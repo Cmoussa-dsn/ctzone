@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Helpers\DashboardHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -19,6 +20,11 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
+        // Check if user is admin
+        if (!\Illuminate\Support\Facades\Auth::check() || \Illuminate\Support\Facades\Auth::user()->role_id != 1) {
+            return redirect('/')->with('error', 'Unauthorized.');
+        }
+        
         try {
             $totalOrders = Order::count();
             $totalProducts = Product::count();
@@ -28,8 +34,8 @@ class AdminDashboardController extends Controller
                 ->take(5)
                 ->get();
                 
-            // Get sales data for the chart
-            $salesData = $this->getSalesData();
+            // Get sales data for the chart using the helper
+            $salesData = DashboardHelper::getSalesData();
             
             return view('admin.dashboard', compact(
                 'totalOrders',
@@ -48,55 +54,6 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Get sales data for the chart.
-     *
-     * @return array
-     */
-    private function getSalesData()
-    {
-        // Get sales for the last 30 days
-        $startDate = Carbon::now()->subDays(29)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
-        
-        $dailySales = Order::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('COUNT(*) as order_count'),
-            DB::raw('SUM(total_price) as total_sales')
-        )
-        ->where('created_at', '>=', $startDate)
-        ->where('created_at', '<=', $endDate)
-        ->groupBy('date')
-        ->orderBy('date')
-        ->get();
-        
-        // Format the data for Chart.js
-        $dates = [];
-        $orderCounts = [];
-        $salesTotals = [];
-        
-        // Initialize with zeros for all 30 days
-        for ($i = 0; $i < 30; $i++) {
-            $date = Carbon::now()->subDays(29 - $i)->format('Y-m-d');
-            $dates[] = Carbon::now()->subDays(29 - $i)->format('M d');
-            $orderCounts[$date] = 0;
-            $salesTotals[$date] = 0;
-        }
-        
-        // Fill in actual data
-        foreach ($dailySales as $sale) {
-            $date = $sale->date;
-            $orderCounts[$date] = $sale->order_count;
-            $salesTotals[$date] = $sale->total_sales;
-        }
-        
-        return [
-            'labels' => $dates,
-            'orderCounts' => array_values($orderCounts),
-            'salesTotals' => array_values($salesTotals)
-        ];
-    }
-    
-    /**
      * Get sales data as JSON for AJAX requests.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -104,72 +61,29 @@ class AdminDashboardController extends Controller
      */
     public function getSalesDataJson(Request $request)
     {
+        // Check if user is admin
+        if (!\Illuminate\Support\Facades\Auth::check() || \Illuminate\Support\Facades\Auth::user()->role_id != 1) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
         try {
             $period = $request->input('period', '30days');
             
-            switch ($period) {
-                case '7days':
-                    $startDate = Carbon::now()->subDays(6)->startOfDay();
-                    break;
-                case '30days':
-                    $startDate = Carbon::now()->subDays(29)->startOfDay();
-                    break;
-                case '90days':
-                    $startDate = Carbon::now()->subDays(89)->startOfDay();
-                    break;
-                case 'year':
-                    $startDate = Carbon::now()->subYear()->startOfDay();
-                    break;
-                default:
-                    $startDate = Carbon::now()->subDays(29)->startOfDay();
-            }
+            // Use the helper class to get formatted sales data
+            $salesData = DashboardHelper::getSalesData($period);
             
-            $endDate = Carbon::now()->endOfDay();
+            // Format data for JSON response
+            $formattedSales = [];
+            $labels = $salesData['labels'];
+            $orderCounts = $salesData['orderCounts'];
+            $salesTotals = $salesData['salesTotals'];
             
-            if ($period === 'year') {
-                // Monthly aggregation for year view
-                $sales = Order::select(
-                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as date'),
-                    DB::raw('COUNT(*) as order_count'),
-                    DB::raw('SUM(total_price) as total_sales')
-                )
-                ->where('created_at', '>=', $startDate)
-                ->where('created_at', '<=', $endDate)
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
-                
-                $formattedSales = [];
-                foreach ($sales as $sale) {
-                    $date = Carbon::createFromFormat('Y-m', $sale->date);
-                    $formattedSales[] = [
-                        'date' => $date->format('M Y'),
-                        'order_count' => $sale->order_count,
-                        'total_sales' => $sale->total_sales
-                    ];
-                }
-            } else {
-                // Daily aggregation for other views
-                $sales = Order::select(
-                    DB::raw('DATE(created_at) as date'),
-                    DB::raw('COUNT(*) as order_count'),
-                    DB::raw('SUM(total_price) as total_sales')
-                )
-                ->where('created_at', '>=', $startDate)
-                ->where('created_at', '<=', $endDate)
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
-                
-                $formattedSales = [];
-                foreach ($sales as $sale) {
-                    $date = Carbon::createFromFormat('Y-m-d', $sale->date);
-                    $formattedSales[] = [
-                        'date' => $date->format('M d'),
-                        'order_count' => $sale->order_count,
-                        'total_sales' => $sale->total_sales
-                    ];
-                }
+            for ($i = 0; $i < count($labels); $i++) {
+                $formattedSales[] = [
+                    'date' => $labels[$i],
+                    'order_count' => $orderCounts[$i],
+                    'total_sales' => $salesTotals[$i]
+                ];
             }
             
             return response()->json($formattedSales);

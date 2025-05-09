@@ -63,156 +63,10 @@ Route::middleware('auth')->group(function () {
             return redirect('/')->with('error', 'Unauthorized.');
         })->name('index');
         
-        Route::get('/dashboard', function () {
-            if (Auth::check() && Auth::user()->role_id == 1) {
-                try {
-                    $totalOrders = \App\Models\Order::count();
-                    $totalProducts = \App\Models\Product::count();
-                    $totalUsers = \App\Models\User::where('role_id', 2)->count();
-                    $recentOrders = \App\Models\Order::with('user')
-                        ->orderBy('created_at', 'desc')
-                        ->take(5)
-                        ->get();
-                    
-                    // Get sales data for the chart
-                    $salesData = [
-                        'labels' => [],
-                        'orderCounts' => [],
-                        'salesTotals' => []
-                    ];
-                    
-                    // Calculate last 30 days of data
-                    $startDate = \Carbon\Carbon::now()->subDays(29)->startOfDay();
-                    $endDate = \Carbon\Carbon::now()->endOfDay();
-                    
-                    $dailySales = \App\Models\Order::select(
-                        \Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'),
-                        \Illuminate\Support\Facades\DB::raw('COUNT(*) as order_count'),
-                        \Illuminate\Support\Facades\DB::raw('SUM(total_price) as total_sales')
-                    )
-                    ->where('created_at', '>=', $startDate)
-                    ->where('created_at', '<=', $endDate)
-                    ->groupBy('date')
-                    ->orderBy('date')
-                    ->get();
-                    
-                    // Initialize with zeros for all 30 days
-                    for ($i = 0; $i < 30; $i++) {
-                        $date = \Carbon\Carbon::now()->subDays(29 - $i)->format('Y-m-d');
-                        $salesData['labels'][] = \Carbon\Carbon::now()->subDays(29 - $i)->format('M d');
-                        $salesData['orderCounts'][$date] = 0;
-                        $salesData['salesTotals'][$date] = 0;
-                    }
-                    
-                    // Fill in actual data
-                    foreach ($dailySales as $sale) {
-                        $date = $sale->date;
-                        $salesData['orderCounts'][$date] = $sale->order_count;
-                        $salesData['salesTotals'][$date] = $sale->total_sales;
-                    }
-                    
-                    $salesData['orderCounts'] = array_values($salesData['orderCounts']);
-                    $salesData['salesTotals'] = array_values($salesData['salesTotals']);
-                    
-                    return view('admin.dashboard', compact(
-                        'totalOrders',
-                        'totalProducts',
-                        'totalUsers',
-                        'recentOrders',
-                        'salesData'
-                    ));
-                } catch (\Exception $e) {
-                    // Log the exception message
-                    \Illuminate\Support\Facades\Log::error('Admin dashboard error: ' . $e->getMessage());
-                    
-                    // For debugging, return a simple view with the error message
-                    return view('admin.error', ['message' => $e->getMessage()]);
-                }
-            }
-            
-            return redirect('/')->with('error', 'Unauthorized.');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         
-        // Sales data API route with closure
-        Route::get('/sales-data', function(\Illuminate\Http\Request $request) {
-            if (Auth::check() && Auth::user()->role_id == 1) {
-                try {
-                    $period = $request->input('period', '30days');
-                    
-                    switch ($period) {
-                        case '7days':
-                            $startDate = \Carbon\Carbon::now()->subDays(6)->startOfDay();
-                            break;
-                        case '30days':
-                            $startDate = \Carbon\Carbon::now()->subDays(29)->startOfDay();
-                            break;
-                        case '90days':
-                            $startDate = \Carbon\Carbon::now()->subDays(89)->startOfDay();
-                            break;
-                        case 'year':
-                            $startDate = \Carbon\Carbon::now()->subYear()->startOfDay();
-                            break;
-                        default:
-                            $startDate = \Carbon\Carbon::now()->subDays(29)->startOfDay();
-                    }
-                    
-                    $endDate = \Carbon\Carbon::now()->endOfDay();
-                    
-                    if ($period === 'year') {
-                        // Monthly aggregation for year view
-                        $sales = \App\Models\Order::select(
-                            \Illuminate\Support\Facades\DB::raw('DATE_FORMAT(created_at, "%Y-%m") as date'),
-                            \Illuminate\Support\Facades\DB::raw('COUNT(*) as order_count'),
-                            \Illuminate\Support\Facades\DB::raw('SUM(total_price) as total_sales')
-                        )
-                        ->where('created_at', '>=', $startDate)
-                        ->where('created_at', '<=', $endDate)
-                        ->groupBy('date')
-                        ->orderBy('date')
-                        ->get();
-                        
-                        $formattedSales = [];
-                        foreach ($sales as $sale) {
-                            $date = \Carbon\Carbon::createFromFormat('Y-m', $sale->date);
-                            $formattedSales[] = [
-                                'date' => $date->format('M Y'),
-                                'order_count' => $sale->order_count,
-                                'total_sales' => $sale->total_sales
-                            ];
-                        }
-                    } else {
-                        // Daily aggregation for other views
-                        $sales = \App\Models\Order::select(
-                            \Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'),
-                            \Illuminate\Support\Facades\DB::raw('COUNT(*) as order_count'),
-                            \Illuminate\Support\Facades\DB::raw('SUM(total_price) as total_sales')
-                        )
-                        ->where('created_at', '>=', $startDate)
-                        ->where('created_at', '<=', $endDate)
-                        ->groupBy('date')
-                        ->orderBy('date')
-                        ->get();
-                        
-                        $formattedSales = [];
-                        foreach ($sales as $sale) {
-                            $date = \Carbon\Carbon::createFromFormat('Y-m-d', $sale->date);
-                            $formattedSales[] = [
-                                'date' => $date->format('M d'),
-                                'order_count' => $sale->order_count,
-                                'total_sales' => $sale->total_sales
-                            ];
-                        }
-                    }
-                    
-                    return response()->json($formattedSales);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Admin getSalesDataJson error: ' . $e->getMessage());
-                    return response()->json(['error' => 'An error occurred while fetching sales data.'], 500);
-                }
-            }
-            
-            return response()->json(['error' => 'Unauthorized'], 403);
-        })->name('sales-data');
+        // Sales data API route
+        Route::get('/sales-data', [AdminDashboardController::class, 'getSalesDataJson'])->name('sales-data');
         
         // Orders
         Route::get('/orders', function () {
@@ -422,8 +276,16 @@ Route::get('/admin/no-middleware', function () {
         return redirect('/')->with('error', 'Unauthorized access.');
     }
     
-    // Use the global helper function
-    extract(getAdminDashboardData());
+    $totalOrders = \App\Models\Order::count();
+    $totalProducts = \App\Models\Product::count();
+    $totalUsers = \App\Models\User::where('role_id', 2)->count();
+    $recentOrders = \App\Models\Order::with('user')
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
+        
+    // Get real sales data using the helper class
+    $salesData = \App\Helpers\DashboardHelper::getSalesData();
     
     return view('admin.dashboard', compact(
         'totalOrders',
@@ -445,12 +307,8 @@ Route::get('/admin/dashboard', function () {
         ->take(5)
         ->get();
         
-    // Static sales data
-    $salesData = [
-        'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        'orderCounts' => [10, 15, 8, 25, 12, 20, 18],
-        'salesTotals' => [1200, 1800, 950, 2500, 1400, 2200, 1900]
-    ];
+    // Get real sales data using the helper class
+    $salesData = \App\Helpers\DashboardHelper::getSalesData();
     
     return view('admin.dashboard', compact(
         'totalOrders',
@@ -503,12 +361,8 @@ Route::get('/admin/dashboard-simple', function () {
             ->take(5)
             ->get();
             
-        // Simple sales data
-        $salesData = [
-            'labels' => ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
-            'orderCounts' => [5, 10, 8, 12, 15],
-            'salesTotals' => [500, 1000, 800, 1200, 1500]
-        ];
+        // Get real sales data using the helper class
+        $salesData = \App\Helpers\DashboardHelper::getSalesData();
         
         return view('admin.dashboard', compact(
             'totalOrders',
@@ -533,12 +387,8 @@ Route::get('/admin/direct-dashboard', function () {
             ->take(5)
             ->get();
             
-        // Simple sales data
-        $salesData = [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'orderCounts' => [5, 10, 15, 20, 25],
-            'salesTotals' => [500, 1000, 1500, 2000, 2500]
-        ];
+        // Get real sales data using the helper class
+        $salesData = \App\Helpers\DashboardHelper::getSalesData();
         
         return view('admin.dashboard', compact(
             'totalOrders',
