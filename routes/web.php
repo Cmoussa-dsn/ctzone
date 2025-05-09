@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SimpleAdminController;
+use App\Http\Controllers\ChatbotController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -416,5 +417,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 Route::get('/admin/simple', [SimpleAdminController::class, 'dashboard'])
     ->middleware('auth')
     ->name('admin.simple');
+
+// Chatbot route
+Route::post('/chatbot', [ChatbotController::class, 'processMessage'])->name('chatbot.process');
+Route::post('/chatbot/clear', [ChatbotController::class, 'clearConversation'])->name('chatbot.clear');
 
 require __DIR__.'/auth.php';

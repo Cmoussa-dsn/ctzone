@@ -206,9 +206,15 @@
                 </div>
             </div>
         </footer>
+        
+        <!-- AI Chatbot -->
+        <?php echo $__env->make('components.chatbot', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- Alpine.js -->
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        <!-- Chatbot JS -->
+        <script src="<?php echo e(asset('js/chatbot.js')); ?>"></script>
         
         <script>
             // Mobile menu toggle

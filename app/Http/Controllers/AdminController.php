@@ -31,24 +31,24 @@ class AdminController extends Controller
     public function index()
     {
         try {
-            $totalOrders = Order::count();
-            $totalProducts = Product::count();
-            $totalUsers = User::where('role_id', 2)->count();
-            $recentOrders = Order::with('user')
-                ->orderBy('created_at', 'desc')
-                ->take(5)
-                ->get();
-                
+        $totalOrders = Order::count();
+        $totalProducts = Product::count();
+        $totalUsers = User::where('role_id', 2)->count();
+        $recentOrders = Order::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+            
             // Get sales data for the chart
             $salesData = $this->getSalesData();
             
             return view('admin.dashboard', compact(
-                'totalOrders',
-                'totalProducts',
-                'totalUsers',
+            'totalOrders',
+            'totalProducts',
+            'totalUsers',
                 'recentOrders',
                 'salesData'
-            ));
+        ));
         } catch (\Exception $e) {
             // Log the exception message
             Log::error('AdminController error: ' . $e->getMessage());

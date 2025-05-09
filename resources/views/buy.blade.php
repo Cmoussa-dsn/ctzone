@@ -1,7 +1,7 @@
 <x-app-layout>
     <!-- Hero Banner -->
     <div class="relative">
-        <img src="{{ asset('images/buyy.jpeg') }}" alt="Buy Pre-built PCs" class="w-full h-96 object-cover brightness-75">
+        <img src="{{ asset('images/buyy.jpeg') }}" class="w-full h-96 object-cover brightness-75">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-indigo-900/70"></div>
         <div class="container mx-auto px-6 absolute inset-0 flex items-center">
             <div class="max-w-2xl text-white">
