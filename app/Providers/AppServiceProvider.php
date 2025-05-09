@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Add admin singleton binding
+        $this->app->singleton('admin', function ($app) {
+            return new \App\Http\Controllers\AdminController;
+        });
     }
 
     /**

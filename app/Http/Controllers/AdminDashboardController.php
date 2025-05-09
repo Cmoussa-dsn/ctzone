@@ -6,23 +6,12 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
 
-class AdminController extends Controller
+class AdminDashboardController extends Controller
 {
-    /**
-     * Constructor to apply middleware
-     */
-    public function __construct()
-    {
-        // Apply middleware through the route instead
-    }
-    
     /**
      * Display the admin dashboard.
      *
@@ -51,59 +40,11 @@ class AdminController extends Controller
             ));
         } catch (\Exception $e) {
             // Log the exception message
-            Log::error('AdminController error: ' . $e->getMessage());
+            Log::error('AdminDashboardController error: ' . $e->getMessage());
             
             // For debugging, return a simple view with the error message
             return view('admin.error', ['message' => $e->getMessage()]);
         }
-    }
-
-    /**
-     * Display a listing of all orders.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function orders()
-    {
-        $orders = Order::with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-            
-        return View::make('admin.orders.index', compact('orders'));
-    }
-    
-    /**
-     * Update the status of an order.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function updateOrderStatus(Request $request, Order $order)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
-        ]);
-        
-        $order->status = $request->status;
-        $order->save();
-        
-        return Redirect::route('admin.orders.index')
-            ->with('success', 'Order status updated successfully');
-    }
-    
-    /**
-     * Display a listing of users.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function users()
-    {
-        $users = User::where('role_id', 2)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-            
-        return View::make('admin.users.index', compact('users'));
     }
     
     /**
@@ -233,8 +174,8 @@ class AdminController extends Controller
             
             return response()->json($formattedSales);
         } catch (\Exception $e) {
-            Log::error('AdminController getSalesDataJson error: ' . $e->getMessage());
+            Log::error('AdminDashboardController getSalesDataJson error: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred while fetching sales data.'], 500);
         }
     }
-}
+} 
