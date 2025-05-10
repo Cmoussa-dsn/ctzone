@@ -19,16 +19,8 @@
                 <img src="<?php echo e(asset('images/loginlogo.png')); ?>" alt="CT ZONE" class="h-16">
             </div>
             
-            <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Welcome Back</h2>
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Create New Account</h2>
             
-            <!-- Session Status -->
-            <?php if(session('status')): ?>
-                <div class="mb-4 font-medium text-sm text-green-600">
-                    <?php echo e(session('status')); ?>
-
-                </div>
-            <?php endif; ?>
-
             <!-- Validation Errors -->
             <?php if($errors->any()): ?>
                 <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
@@ -42,8 +34,20 @@
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="<?php echo e(route('login')); ?>">
+            <form method="POST" action="<?php echo e(route('register')); ?>">
                 <?php echo csrf_field(); ?>
+
+                <!-- Name -->
+                <div class="mb-5">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input id="name" type="text" name="name" value="<?php echo e(old('name')); ?>" required autofocus 
+                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                    </div>
+                </div>
 
                 <!-- Email Address -->
                 <div class="mb-5">
@@ -52,8 +56,8 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-envelope text-gray-400"></i>
                         </div>
-                        <input id="email" type="email" name="email" value="<?php echo e(old('email')); ?>" required autofocus 
-                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <input id="email" type="email" name="email" value="<?php echo e(old('email')); ?>" required 
+                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                     </div>
                 </div>
 
@@ -65,37 +69,34 @@
                             <i class="fas fa-lock text-gray-400"></i>
                         </div>
                         <input id="password" type="password" name="password" required 
-                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                     </div>
                 </div>
 
-                <!-- Remember Me -->
-                <div class="flex items-center justify-between mt-5">
-                    <div class="flex items-center">
-                        <input id="remember_me" type="checkbox" name="remember" 
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="remember_me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                <!-- Confirm Password -->
+                <div class="mb-5">
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password_confirmation" type="password" name="password_confirmation" required 
+                            class="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                     </div>
-
-                    <?php if(Route::has('password.request')): ?>
-                        <a class="text-sm text-indigo-600 hover:text-indigo-500 font-medium" href="<?php echo e(route('password.request')); ?>">
-                            Forgot password?
-                        </a>
-                    <?php endif; ?>
                 </div>
 
                 <div class="mt-6">
-                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200">
-                        Login
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
+                        Register
                     </button>
                 </div>
             </form>
             
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
-                    Don't have an account?
-                    <a href="<?php echo e(route('register')); ?>" class="font-medium text-indigo-600 hover:text-indigo-500 ml-1">
-                        Sign up
+                    Already have an account?
+                    <a href="<?php echo e(route('login')); ?>" class="font-medium text-purple-600 hover:text-purple-500 ml-1">
+                        Sign in
                     </a>
                 </p>
             </div>
@@ -104,7 +105,7 @@
     
     <style>
         .bg-gradient-animation {
-            background: linear-gradient(-45deg, #3b82f6, #4f46e5, #6366f1, #8b5cf6);
+            background: linear-gradient(-45deg, #9333ea, #7e22ce, #6b21a8, #4c1d95);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
         }
@@ -136,10 +137,10 @@
             height: 200px;
             width: 200px;
             background: rgba(255, 255, 255, 0.08);
-            left: 50%;
+            left: 40%;
             transform: rotate(45deg);
             border-radius: 30px;
-            animation: float 8s ease-in-out infinite;
+            animation: float 9s ease-in-out infinite;
         }
         
         .geometric-shapes::after {
@@ -148,11 +149,11 @@
             height: 300px;
             width: 300px;
             background: rgba(255, 255, 255, 0.08);
-            left: 20%;
-            top: 20%;
-            transform: rotate(20deg);
+            left: 30%;
+            top: 30%;
+            transform: rotate(30deg);
             border-radius: 40px;
-            animation: float 9s ease-in-out infinite 1s alternate;
+            animation: float 8s ease-in-out infinite 1s alternate;
         }
         
         @keyframes float {
@@ -177,4 +178,4 @@
 <?php $component = $__componentOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
 <?php unset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
 <?php endif; ?>
-<?php /**PATH C:\Users\charb\Downloads\modern_ct_zone (2)\modern_ct_zone\resources\views/auth/login.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\charb\Downloads\modern_ct_zone (2)\modern_ct_zone\resources\views/auth/register.blade.php ENDPATH**/ ?>

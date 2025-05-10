@@ -19,6 +19,11 @@
     <!-- Calculator Section -->
     <div class="container mx-auto px-6 py-12">
         <div class="max-w-4xl mx-auto">
+            <?php if(session('message')): ?>
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+                    <p><?php echo e(session('message')); ?></p>
+                </div>
+            <?php endif; ?>
             <!-- Live Cryptocurrency Prices -->
             <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="p-6">
