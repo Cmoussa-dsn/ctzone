@@ -1,4 +1,13 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <!-- Hero Banner -->
     <div class="relative">
         <div class="w-full h-96 bg-gradient-to-r from-blue-900 to-indigo-900"></div>
@@ -9,7 +18,7 @@
                 <p class="text-xl mb-6">Customize every component to create your perfect system</p>
                 <div class="flex space-x-4">
                     <a href="#builder" class="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">Start Building</a>
-                    <a href="{{ route('buy') }}" class="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition duration-300">View Pre-built PCs</a>
+                    <a href="<?php echo e(route('buy')); ?>" class="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition duration-300">View Pre-built PCs</a>
                 </div>
             </div>
         </div>
@@ -23,8 +32,8 @@
                 <p class="text-gray-600 max-w-2xl mx-auto">Select your components below to build your custom PC. We'll assemble it, test it, and ship it to your doorstep.</p>
             </div>
             
-            <form action="{{ route('pc-builder.store') }}" method="POST" class="max-w-4xl mx-auto">
-                @csrf
+            <form action="<?php echo e(route('pc-builder.store')); ?>" method="POST" class="max-w-4xl mx-auto">
+                <?php echo csrf_field(); ?>
                 
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <!-- Component Selection Grid -->
@@ -37,11 +46,12 @@
                             </h3>
                             <select name="processor" id="processor" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="processor">
                                 <option value="">Select a Processor</option>
-                                @foreach($components['processors'] as $processor)
-                                    <option value="{{ $processor->id }}" data-price="{{ $processor->price }}">
-                                        {{ $processor->name }} - ${{ number_format($processor->price, 2) }}
+                                <?php $__currentLoopData = $components['processors']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $processor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($processor->id); ?>" data-price="<?php echo e($processor->price); ?>">
+                                        <?php echo e($processor->name); ?> - $<?php echo e(number_format($processor->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -53,11 +63,12 @@
                             </h3>
                             <select name="motherboard" id="motherboard" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="motherboard">
                                 <option value="">Select a Motherboard</option>
-                                @foreach($components['motherboards'] as $motherboard)
-                                    <option value="{{ $motherboard->id }}" data-price="{{ $motherboard->price }}">
-                                        {{ $motherboard->name }} - ${{ number_format($motherboard->price, 2) }}
+                                <?php $__currentLoopData = $components['motherboards']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $motherboard): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($motherboard->id); ?>" data-price="<?php echo e($motherboard->price); ?>">
+                                        <?php echo e($motherboard->name); ?> - $<?php echo e(number_format($motherboard->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -69,11 +80,12 @@
                             </h3>
                             <select name="graphics" id="graphics" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="graphics">
                                 <option value="">Select a Graphics Card</option>
-                                @foreach($components['graphics'] as $graphics)
-                                    <option value="{{ $graphics->id }}" data-price="{{ $graphics->price }}">
-                                        {{ $graphics->name }} - ${{ number_format($graphics->price, 2) }}
+                                <?php $__currentLoopData = $components['graphics']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $graphics): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($graphics->id); ?>" data-price="<?php echo e($graphics->price); ?>">
+                                        <?php echo e($graphics->name); ?> - $<?php echo e(number_format($graphics->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -85,11 +97,12 @@
                             </h3>
                             <select name="memory" id="memory" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="memory">
                                 <option value="">Select Memory</option>
-                                @foreach($components['memory'] as $memory)
-                                    <option value="{{ $memory->id }}" data-price="{{ $memory->price }}">
-                                        {{ $memory->name }} - ${{ number_format($memory->price, 2) }}
+                                <?php $__currentLoopData = $components['memory']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $memory): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($memory->id); ?>" data-price="<?php echo e($memory->price); ?>">
+                                        <?php echo e($memory->name); ?> - $<?php echo e(number_format($memory->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -101,11 +114,12 @@
                             </h3>
                             <select name="storage" id="storage" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="storage">
                                 <option value="">Select Storage</option>
-                                @foreach($components['storage'] as $storage)
-                                    <option value="{{ $storage->id }}" data-price="{{ $storage->price }}">
-                                        {{ $storage->name }} - ${{ number_format($storage->price, 2) }}
+                                <?php $__currentLoopData = $components['storage']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $storage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($storage->id); ?>" data-price="<?php echo e($storage->price); ?>">
+                                        <?php echo e($storage->name); ?> - $<?php echo e(number_format($storage->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -117,11 +131,12 @@
                             </h3>
                             <select name="power" id="power" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="power">
                                 <option value="">Select Power Supply</option>
-                                @foreach($components['power'] as $power)
-                                    <option value="{{ $power->id }}" data-price="{{ $power->price }}">
-                                        {{ $power->name }} - ${{ number_format($power->price, 2) }}
+                                <?php $__currentLoopData = $components['power']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $power): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($power->id); ?>" data-price="<?php echo e($power->price); ?>">
+                                        <?php echo e($power->name); ?> - $<?php echo e(number_format($power->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -133,11 +148,12 @@
                             </h3>
                             <select name="case" id="case" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="case">
                                 <option value="">Select a Case</option>
-                                @foreach($components['cases'] as $case)
-                                    <option value="{{ $case->id }}" data-price="{{ $case->price }}">
-                                        {{ $case->name }} - ${{ number_format($case->price, 2) }}
+                                <?php $__currentLoopData = $components['cases']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $case): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($case->id); ?>" data-price="<?php echo e($case->price); ?>">
+                                        <?php echo e($case->name); ?> - $<?php echo e(number_format($case->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         
@@ -149,11 +165,12 @@
                             </h3>
                             <select name="cooling" id="cooling" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required data-component="cooling">
                                 <option value="">Select Cooling</option>
-                                @foreach($components['cooling'] as $cooling)
-                                    <option value="{{ $cooling->id }}" data-price="{{ $cooling->price }}">
-                                        {{ $cooling->name }} - ${{ number_format($cooling->price, 2) }}
+                                <?php $__currentLoopData = $components['cooling']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cooling): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($cooling->id); ?>" data-price="<?php echo e($cooling->price); ?>">
+                                        <?php echo e($cooling->name); ?> - $<?php echo e(number_format($cooling->price, 2)); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -172,15 +189,15 @@
                     
                     <!-- Submit Button -->
                     <div class="bg-gray-100 p-6 text-right">
-                        @auth
+                        <?php if(auth()->guard()->check()): ?>
                             <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition duration-300">
                                 Add to Cart
                             </button>
-                        @else
-                            <a href="{{ route('login') }}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition duration-300 inline-block">
+                        <?php else: ?>
+                            <a href="<?php echo e(route('login')); ?>" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition duration-300 inline-block">
                                 Login to Continue
                             </a>
-                        @endauth
+                        <?php endif; ?>
                     </div>
                 </div>
             </form>
@@ -223,7 +240,7 @@
         </div>
     </section>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const components = document.querySelectorAll('select[data-component]');
@@ -248,11 +265,20 @@
             });
         });
     </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
     <style>
         .bg-pattern {
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
     </style>
-</x-app-layout> 
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?> <?php /**PATH C:\Users\charb\Downloads\modern_ct_zone (2)\modern_ct_zone\resources\views/pc-builder.blade.php ENDPATH**/ ?>
