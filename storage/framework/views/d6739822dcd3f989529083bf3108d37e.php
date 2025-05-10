@@ -14,6 +14,7 @@
         
         <!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/9d214354b3.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
@@ -50,6 +51,12 @@
                 <p>&copy; <?php echo e(date('Y')); ?> CT ZONE. All rights reserved.</p>
             </div>
         </div>
+        
+        <!-- AI Chatbot -->
+        <?php echo $__env->make('components.chatbot', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        
+        <!-- Chatbot JS -->
+        <script src="<?php echo e(asset('js/chatbot.js')); ?>"></script>
     </body>
 </html>
 <?php /**PATH C:\Users\charb\Downloads\modern_ct_zone (2)\modern_ct_zone\resources\views/layouts/guest.blade.php ENDPATH**/ ?>

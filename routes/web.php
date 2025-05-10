@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SimpleAdminController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\MiningController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -421,5 +422,18 @@ Route::get('/admin/simple', [SimpleAdminController::class, 'dashboard'])
 // Chatbot route
 Route::post('/chatbot', [ChatbotController::class, 'processMessage'])->name('chatbot.process');
 Route::post('/chatbot/clear', [ChatbotController::class, 'clearConversation'])->name('chatbot.clear');
+
+// Mining routes
+Route::prefix('mining')->name('mining.')->group(function () {
+    Route::get('/', [MiningController::class, 'index'])->name('index');
+    Route::get('/products', [MiningController::class, 'products'])->name('products');
+    Route::get('/products/{id}', [MiningController::class, 'show'])->name('show');
+    
+    // Protected routes - require authentication
+    Route::middleware('auth')->group(function () {
+        Route::get('/calculator', [MiningController::class, 'calculator'])->name('calculator');
+        Route::post('/calculate', [MiningController::class, 'calculateProfitability'])->name('calculate');
+    });
+});
 
 require __DIR__.'/auth.php';
