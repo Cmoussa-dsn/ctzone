@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SimpleAdminController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\MiningController;
+use App\Http\Controllers\AdminMiningProductController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -342,6 +343,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         $products = \App\Models\Product::with('category')->paginate(15);
         return view('admin.products.index', compact('products'));
     })->name('products.index');
+    
+    // Mining Products
+    Route::get('/mining', [AdminMiningProductController::class, 'index'])->name('mining.index');
+    Route::get('/mining/create', [AdminMiningProductController::class, 'create'])->name('mining.create');
+    Route::post('/mining', [AdminMiningProductController::class, 'store'])->name('mining.store');
+    Route::get('/mining/{id}', [AdminMiningProductController::class, 'show'])->name('mining.show');
+    Route::get('/mining/{id}/edit', [AdminMiningProductController::class, 'edit'])->name('mining.edit');
+    Route::post('/mining/{id}/edit', [AdminMiningProductController::class, 'update'])->name('mining.update');
+    Route::delete('/mining/{id}', [AdminMiningProductController::class, 'destroy'])->name('mining.destroy');
 });
 
 // Direct admin test route

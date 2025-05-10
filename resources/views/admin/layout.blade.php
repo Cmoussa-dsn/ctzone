@@ -49,6 +49,10 @@
                     <i class="fas fa-box"></i>
                     <span class="hidden md:inline">Products</span>
                 </a>
+                <a href="{{ route('admin.mining.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.mining.*') ? 'bg-green-500 text-white shadow' : 'text-gray-700 hover:bg-green-100' }}">
+                    <i class="fas fa-microchip"></i>
+                    <span class="hidden md:inline">Mining Products</span>
+                </a>
                 <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.categories.*') ? 'bg-green-500 text-white shadow' : 'text-gray-700 hover:bg-green-100' }}">
                     <i class="fas fa-tags"></i>
                     <span class="hidden md:inline">Categories</span>
