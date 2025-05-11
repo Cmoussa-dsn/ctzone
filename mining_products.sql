@@ -1,0 +1,13 @@
+-- First, truncate the table to clear any existing data
+TRUNCATE TABLE `mining_products`;
+
+-- Insert mock data
+INSERT INTO `mining_products` (`name`, `description`, `price`, `stock_quantity`, `image`, `hashrate`, `power_consumption`, `algorithm`, `daily_profit_estimate`, `featured`, `created_at`, `updated_at`) VALUES
+('Antminer S19 Pro', 'The Antminer S19 Pro is a high-performance Bitcoin mining machine with exceptional hashrate and energy efficiency. Perfect for professional miners looking to maximize their returns.', 2899.99, 15, 'mining/antminer-s19-pro.webp', '110 TH/s', 3250, 'SHA-256', 5.80, 1, NOW(), NOW()),
+('NVIDIA RTX 4090 Mining Edition', 'Specialized mining version of the powerful NVIDIA GeForce RTX 4090. This card delivers exceptional hashrates for Ethereum and other GPU-mineable cryptocurrencies.', 1899.99, 22, 'mining/rtx-4090-mining.webp', '150 MH/s', 320, 'Ethash, Kawpow, Octopus', 3.25, 1, NOW(), NOW()),
+('WhatsMiner M50S', 'The WhatsMiner M50S is a Bitcoin mining machine known for its reliability and solid performance. Great for miners of all experience levels.', 3499.99, 8, 'mining/whatsminer-m50s.webp', '126 TH/s', 3276, 'SHA-256', 6.40, 1, NOW(), NOW()),
+('AMD Radeon RX 6900 XT Mining Rig', 'Complete 6-GPU mining rig built with AMD Radeon RX 6900 XT cards. Plug-and-play solution with all necessary components including frame, motherboard, power supplies, and risers.', 7499.99, 5, 'mining/amd-mining-rig.webp', '390 MH/s', 1800, 'Ethash, Kawpow', 8.75, 1, NOW(), NOW()),
+('Mining Rig Frame', 'Sturdy aluminum frame designed to hold up to 12 GPUs. Includes proper airflow design and built-in power button for convenience.', 159.99, 30, 'mining/mining-frame.webp', 'N/A', 0, 'N/A', 0.00, 0, NOW(), NOW()),
+('Bitmain Power Supply APW9+', 'High-efficiency power supply designed specifically for cryptocurrency mining. Supports multiple Antminer models with stable power delivery.', 199.99, 25, 'mining/bitmain-psu.webp', 'N/A', 0, 'N/A', 0.00, 0, NOW(), NOW()),
+('Immersion Cooling Kit', 'Complete immersion cooling solution for mining rigs. Includes tank, dielectric fluid, and pump system for optimal temperature management and increased mining efficiency.', 2499.99, 7, 'mining/immersion-cooling.webp', 'N/A', 200, 'N/A', 0.00, 0, NOW(), NOW()),
+('Mining Farm Setup Package', 'Complete starter package for a small mining farm. Includes 3 Antminer S19j Pro units, power distribution unit, shelving, and networking equipment.', 12999.99, 3, 'mining/mining-farm-package.webp', '440 TH/s', 13000, 'SHA-256', 22.50, 1, NOW(), NOW()); 

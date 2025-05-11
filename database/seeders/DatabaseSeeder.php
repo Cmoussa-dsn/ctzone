@@ -118,5 +118,10 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $product) {
             Product::create($product);
         }
+
+        // Comment out the MiningProductSeeder call since we're handling it separately
+        // $this->call([
+        //     MiningProductSeeder::class,
+        // ]);
     }
 }
