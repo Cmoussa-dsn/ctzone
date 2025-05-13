@@ -317,27 +317,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- ROI Estimation -->
-                    <div class="bg-gray-50 rounded-lg p-6">
-                        <h3 class="text-lg font-medium mb-4">ROI Estimation</h3>
-                        
-                        <div class="flex items-center mb-4">
-                            <label for="hardware-cost" class="block text-sm font-medium text-gray-700 mr-4">Hardware Cost:</label>
-                            <div class="flex">
-                                <span class="px-3 py-2 border border-gray-300 border-r-0 rounded-l-lg bg-gray-50 flex items-center">$</span>
-                                <input type="number" id="hardware-cost" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value="3000" min="0">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h4 class="font-medium mb-2">Break-even Period</h4>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                                <div id="roi-progress" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
-                            </div>
-                            <p class="text-sm text-gray-600" id="roi-text">Calculating...</p>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -413,126 +392,6 @@
             const calculateBtn = document.getElementById('calculate-btn');
             const resultsSection = document.getElementById('results-section');
             const refreshButton = document.getElementById('refresh-prices-button');
-            
-            // Setup refresh button
-            if (refreshButton) {
-                refreshButton.addEventListener('click', function() {
-                    // Change button state to loading
-                    this.disabled = true;
-                    const originalText = this.innerHTML;
-                    this.innerHTML = `
-                        <svg class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Updating...
-                    `;
-                    
-                    // Fetch fresh prices
-                    fetch('<?php echo e(route('mining.calculate')); ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
-                        },
-                        body: JSON.stringify({
-                            hashrate: 1,
-                            hashrate_unit: 'TH',
-                            power_consumption: 100,
-                            electricity_cost: 0.1,
-                            algorithm: 'SHA-256',
-                            pool_fee: 1,
-                            price_refresh_only: true
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.prices) {
-                            // Update price display
-                            if (data.prices.BTC) {
-                                document.querySelector('[alt="Bitcoin"] + span + div').textContent = '$' + parseFloat(data.prices.BTC).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            }
-                            if (data.prices.ETH) {
-                                document.querySelector('[alt="Ethereum"] + span + div').textContent = '$' + parseFloat(data.prices.ETH).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            }
-                            if (data.prices.LTC) {
-                                document.querySelector('[alt="Litecoin"] + span + div').textContent = '$' + parseFloat(data.prices.LTC).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            }
-                            if (data.prices.DASH) {
-                                document.querySelector('[alt="Dash"] + span + div').textContent = '$' + parseFloat(data.prices.DASH).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            }
-                            if (data.prices.XMR) {
-                                document.querySelector('[alt="Monero"] + span + div').textContent = '$' + parseFloat(data.prices.XMR).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            }
-                            
-                            // Update timestamp
-                            if (data.prices.timestamp) {
-                                const timestampDisplay = document.querySelector('.text-blue-200');
-                                if (timestampDisplay) {
-                                    timestampDisplay.textContent = 'Updated: ' + new Date(data.prices.timestamp * 1000).toLocaleString();
-                                }
-                            }
-                            
-                            // Show success message
-                            const notification = document.createElement('div');
-                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg';
-                            notification.style.zIndex = '9999';
-                            notification.innerHTML = `
-                                <div class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                    Prices updated successfully
-                                </div>
-                            `;
-                            document.body.appendChild(notification);
-                            
-                            // Remove notification after 3 seconds
-                            setTimeout(() => {
-                                notification.style.opacity = '0';
-                                notification.style.transition = 'opacity 0.5s';
-                                setTimeout(() => {
-                                    notification.remove();
-                                }, 500);
-                            }, 3000);
-                        }
-                        
-                        // Reset button state
-                        this.innerHTML = originalText;
-                        this.disabled = false;
-                    })
-                    .catch(error => {
-                        console.error('Error refreshing prices:', error);
-                        
-                        // Show error notification
-                        const errorNotification = document.createElement('div');
-                        errorNotification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg';
-                        errorNotification.style.zIndex = '9999';
-                        errorNotification.innerHTML = `
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                </svg>
-                                Failed to update prices
-                            </div>
-                        `;
-                        document.body.appendChild(errorNotification);
-                        
-                        // Remove notification after 3 seconds
-                        setTimeout(() => {
-                            errorNotification.style.opacity = '0';
-                            errorNotification.style.transition = 'opacity 0.5s';
-                            setTimeout(() => {
-                                errorNotification.remove();
-                            }, 500);
-                        }, 3000);
-                        
-                        // Reset button state
-                        this.innerHTML = originalText;
-                        this.disabled = false;
-                    });
-                });
-            }
             
             // Function to refresh cryptocurrency prices every 5 minutes
             function setupPriceRefresh() {
@@ -613,7 +472,6 @@
                 const electricityCost = parseFloat(electricityInput.value);
                 const algorithm = algorithmSelect.value;
                 const poolFee = parseFloat(poolFeeInput.value);
-                const hardwareCost = parseFloat(document.getElementById('hardware-cost').value);
                 
                 // Validate inputs
                 if (isNaN(hashrate) || isNaN(power) || isNaN(electricityCost) || isNaN(poolFee)) {
@@ -652,18 +510,29 @@
                         return;
                     }
                     
-                    // Update results section
-                    document.getElementById('daily-revenue').innerText = '$' + data.daily_reward_usd;
-                    document.getElementById('daily-power-cost').innerText = '$' + data.daily_power_cost;
-                    document.getElementById('daily-profit').innerText = '$' + data.daily_profit;
+                    // Ensure all values are properly parsed as numbers to avoid string concatenation
+                    const dailyRewardUsd = parseFloat(data.daily_reward_usd);
+                    const dailyPowerCost = parseFloat(data.daily_power_cost);
+                    const dailyProfit = parseFloat(data.daily_profit);
+                    const monthlyPowerCost = parseFloat(data.monthly_power_cost);
+                    const monthlyProfit = parseFloat(data.monthly_profit);
+                    const yearlyPowerCost = parseFloat(data.yearly_power_cost);
+                    const yearlyProfit = parseFloat(data.yearly_profit);
                     
-                    document.getElementById('monthly-revenue').innerText = '$' + (data.daily_reward_usd * 30).toFixed(2);
-                    document.getElementById('monthly-power-cost').innerText = '$' + data.monthly_power_cost;
-                    document.getElementById('monthly-profit').innerText = '$' + data.monthly_profit;
+                    // Update results section with formatted values
+                    document.getElementById('daily-revenue').innerText = '$' + dailyRewardUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('daily-power-cost').innerText = '$' + dailyPowerCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('daily-profit').innerText = '$' + dailyProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     
-                    document.getElementById('yearly-revenue').innerText = '$' + (data.daily_reward_usd * 365).toFixed(2);
-                    document.getElementById('yearly-power-cost').innerText = '$' + data.yearly_power_cost;
-                    document.getElementById('yearly-profit').innerText = '$' + data.yearly_profit;
+                    const monthlyRevenue = dailyRewardUsd * 30;
+                    document.getElementById('monthly-revenue').innerText = '$' + monthlyRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('monthly-power-cost').innerText = '$' + monthlyPowerCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('monthly-profit').innerText = '$' + monthlyProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    
+                    const yearlyRevenue = dailyRewardUsd * 365;
+                    document.getElementById('yearly-revenue').innerText = '$' + yearlyRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('yearly-power-cost').innerText = '$' + yearlyPowerCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('yearly-profit').innerText = '$' + yearlyProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     
                     document.getElementById('daily-crypto').innerText = data.daily_reward + ' ' + data.crypto_symbol;
                     document.getElementById('monthly-crypto').innerText = data.monthly_reward + ' ' + data.crypto_symbol;
@@ -673,20 +542,13 @@
                     if (data.using_live_prices) {
                         document.getElementById('price-banner').classList.remove('hidden');
                         document.getElementById('fallback-price-banner').classList.add('hidden');
-                        document.getElementById('crypto-price-display').innerText = '$' + data.crypto_price.toLocaleString();
+                        document.getElementById('crypto-price-display').innerText = '$' + parseFloat(data.crypto_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                         document.getElementById('crypto-symbol-display').innerText = data.crypto_symbol;
                         document.getElementById('price-updated-at').innerText = 'Updated: ' + data.price_updated_at;
                     } else {
                         document.getElementById('price-banner').classList.add('hidden');
                         document.getElementById('fallback-price-banner').classList.remove('hidden');
                     }
-                    
-                    // ROI calculation
-                    const daysToROI = hardwareCost / data.daily_profit;
-                    const roiPercentage = Math.min(100, (data.yearly_profit / hardwareCost) * 100);
-                    
-                    document.getElementById('roi-progress').style.width = roiPercentage + '%';
-                    document.getElementById('roi-text').innerText = 'Estimated payback period: ' + Math.round(daysToROI) + ' days (' + (daysToROI / 30).toFixed(1) + ' months)';
                     
                     // Show results section
                     resultsSection.classList.remove('hidden');

@@ -129,92 +129,28 @@ class MiningController extends Controller
             return $this->getCryptoPrices();
         });
         
-        // Extract user inputs
-        $hashrateValue = $validated['hashrate'];
-        $hashrateUnit = $validated['hashrate_unit'];
-        $algorithm = $validated['algorithm'];
-        $powerConsumption = $validated['power_consumption'];
-        $electricityCost = $validated['electricity_cost'];
-        $poolFeePercentage = $validated['pool_fee'] / 100;
+        // Normalize hashrate to TH/s for calculations
+        $hashrate = $this->normalizeHashrate($validated['hashrate'], $validated['hashrate_unit']);
         
-        // Calculate daily rewards based on algorithm and hashrate
-        // Using direct reference values based on current mining profitability
-        $dailyReward = 0;
-        $cryptoSymbol = '';
-        
-        switch ($algorithm) {
-            case 'SHA-256':
-                $cryptoSymbol = 'BTC';
-                // For SHA-256 mining (Bitcoin)
-                // Convert to TH/s as standard unit for BTC mining
-                $hashrateInTH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'TH');
-                
-                // Real-world reference: 1 TH/s ≈ 0.000008 BTC per day
-                // Increased to 0.00005 BTC per day for better visibility in MH/s range
-                $dailyReward = $hashrateInTH * 0.00005;
-                break;
-                
-            case 'Ethash':
-                $cryptoSymbol = 'ETH';
-                // For Ethash mining (Ethereum/ETC)
-                // Convert to MH/s as standard unit for ETH mining
-                $hashrateInMH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'MH');
-                
-                // Real-world reference enhanced for better visibility
-                // 100 MH/s ≈ 0.003 ETH per day
-                $dailyReward = ($hashrateInMH / 100) * 0.003;
-                break;
-                
-            case 'Scrypt':
-                $cryptoSymbol = 'LTC';
-                // For Scrypt mining (Litecoin)
-                // Convert to MH/s as standard unit for LTC mining
-                $hashrateInMH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'MH');
-                
-                // Real-world reference enhanced for better visibility
-                // 100 MH/s ≈ 0.03 LTC per day
-                $dailyReward = ($hashrateInMH / 100) * 0.03;
-                break;
-                
-            case 'X11':
-                $cryptoSymbol = 'DASH';
-                // For X11 mining (Dash)
-                // Convert to GH/s as standard unit for DASH mining
-                $hashrateInGH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'GH');
-                
-                // Real-world reference enhanced for better visibility
-                // 1 GH/s ≈ 0.002 DASH per day
-                $dailyReward = $hashrateInGH * 0.002;
-                break;
-                
-            case 'RandomX':
-                $cryptoSymbol = 'XMR';
-                // For RandomX mining (Monero)
-                // Convert to H/s as standard unit for XMR mining
-                $hashrateInH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'H');
-                
-                // Real-world reference enhanced for better visibility
-                // 10000 H/s ≈ 0.008 XMR per day
-                $dailyReward = ($hashrateInH / 10000) * 0.008;
-                break;
-                
-            default:
-                // Fallback
-                $cryptoSymbol = 'BTC';
-                $dailyReward = 0.00001;
-        }
-        
-        // Apply pool fee
-        $dailyReward = $dailyReward * (1 - $poolFeePercentage);
-        
-        // Get cryptocurrency price
+        // Determine which cryptocurrency based on algorithm
+        $cryptoData = $this->getCryptoDataByAlgorithm($validated['algorithm']);
+        $cryptoSymbol = $cryptoData['symbol'];
         $cryptoPrice = $cryptoPrices[$cryptoSymbol] ?? $this->getFallbackPrices()[$cryptoSymbol];
+        
+        // Network difficulty and block reward values (simplified for calculation)
+        $networkDifficulty = $cryptoData['difficulty'];
+        $blockReward = $cryptoData['block_reward'];
+        $blocksPerDay = $cryptoData['blocks_per_day'];
+        
+        // Calculate mining rewards in cryptocurrency
+        $poolFeePercentage = $validated['pool_fee'] / 100;
+        $dailyReward = $this->calculateDailyReward($hashrate, $networkDifficulty, $blockReward, $blocksPerDay, $poolFeePercentage);
+        
+        // Calculate power costs
+        $dailyPowerCost = $this->calculatePowerCost($validated['power_consumption'], $validated['electricity_cost']);
         
         // Calculate rewards in USD
         $dailyRewardUsd = $dailyReward * $cryptoPrice;
-        
-        // Calculate power costs
-        $dailyPowerCost = ($powerConsumption / 1000) * 24 * $electricityCost; // kWh per day * cost per kWh
         
         // Calculate profit
         $dailyProfit = $dailyRewardUsd - $dailyPowerCost;
@@ -229,29 +165,17 @@ class MiningController extends Controller
         $monthlyReward = $dailyReward * 30;
         $yearlyReward = $dailyReward * 365;
         
-        // Log calculation details for debugging
-        Log::info("Mining profitability calculation", [
-            'algorithm' => $algorithm,
-            'hashrate' => $hashrateValue . ' ' . $hashrateUnit,
-            'crypto_symbol' => $cryptoSymbol,
-            'crypto_price' => $cryptoPrice,
-            'daily_reward_crypto' => $dailyReward,
-            'daily_reward_usd' => $dailyRewardUsd,
-            'daily_power_cost' => $dailyPowerCost,
-            'daily_profit' => $dailyProfit
-        ]);
-        
         return response()->json([
-            'daily_reward' => number_format($dailyReward, 8, '.', ''),
-            'monthly_reward' => number_format($monthlyReward, 8, '.', ''),
-            'yearly_reward' => number_format($yearlyReward, 8, '.', ''),
-            'daily_reward_usd' => number_format($dailyRewardUsd, 2, '.', ''),
-            'daily_power_cost' => number_format($dailyPowerCost, 2, '.', ''),
-            'daily_profit' => number_format($dailyProfit, 2, '.', ''),
-            'monthly_power_cost' => number_format($monthlyPowerCost, 2, '.', ''),
-            'monthly_profit' => number_format($monthlyProfit, 2, '.', ''),
-            'yearly_power_cost' => number_format($yearlyPowerCost, 2, '.', ''),
-            'yearly_profit' => number_format($yearlyProfit, 2, '.', ''),
+            'daily_reward' => number_format($dailyReward, 8),
+            'monthly_reward' => number_format($monthlyReward, 8),
+            'yearly_reward' => number_format($yearlyReward, 8),
+            'daily_reward_usd' => number_format($dailyRewardUsd, 2),
+            'daily_power_cost' => number_format($dailyPowerCost, 2),
+            'daily_profit' => number_format($dailyProfit, 2),
+            'monthly_power_cost' => number_format($monthlyPowerCost, 2),
+            'monthly_profit' => number_format($monthlyProfit, 2),
+            'yearly_power_cost' => number_format($yearlyPowerCost, 2),
+            'yearly_profit' => number_format($yearlyProfit, 2),
             'crypto_symbol' => $cryptoSymbol,
             'crypto_price' => $cryptoPrice,
             'using_live_prices' => !isset($cryptoPrices['is_fallback']),
@@ -260,31 +184,25 @@ class MiningController extends Controller
     }
     
     /**
-     * Convert hashrate to standard unit used for each algorithm
-     *
-     * @param float $value Original hashrate value
-     * @param string $fromUnit Original unit (TH, GH, MH, KH)
-     * @param string $toUnit Target unit (TH, GH, MH, KH, H)
-     * @return float Converted hashrate value
+     * Normalize hashrate to TH/s for calculations
+     * 
+     * @param float $hashrate
+     * @param string $unit
+     * @return float
      */
-    private function convertToStandardUnit($value, $fromUnit, $toUnit)
+    private function normalizeHashrate($hashrate, $unit)
     {
-        // Define conversion factors (to H/s)
-        $toHs = [
-            'KH' => 1000,
-            'MH' => 1000000,
-            'GH' => 1000000000,
-            'TH' => 1000000000000,
-            'H' => 1
-        ];
-        
-        // First convert to H/s
-        $valueInHs = $value * $toHs[$fromUnit];
-        
-        // Then convert to target unit
-        $result = $valueInHs / $toHs[$toUnit];
-        
-        return $result;
+        switch ($unit) {
+            case 'KH':
+                return $hashrate / 1000000000; // KH/s to TH/s
+            case 'MH':
+                return $hashrate / 1000000; // MH/s to TH/s
+            case 'GH':
+                return $hashrate / 1000; // GH/s to TH/s
+            case 'TH':
+            default:
+                return $hashrate; // Already in TH/s
+        }
     }
     
     /**
@@ -300,36 +218,36 @@ class MiningController extends Controller
             'SHA-256' => [
                 'symbol' => 'BTC',
                 'name' => 'Bitcoin',
-                'difficulty' => 125.262 * 1000000, // More precise difficulty factor
+                'difficulty' => 125 * 1000000, // Simplified network difficulty factor
                 'block_reward' => 6.25, // Current BTC block reward
                 'blocks_per_day' => 144, // ~10 minutes per block
             ],
             'Ethash' => [
                 'symbol' => 'ETH', 
                 'name' => 'Ethereum',
-                'difficulty' => 15.498 * 1000000, // More precise difficulty factor
+                'difficulty' => 15 * 1000000, // Simplified network difficulty factor
                 'block_reward' => 2.0, // ETC block reward (as ETH is now PoS)
                 'blocks_per_day' => 6000, // ~15 seconds per block (for ETC)
             ],
             'Scrypt' => [
                 'symbol' => 'LTC',
                 'name' => 'Litecoin',
-                'difficulty' => 20.153 * 1000000, // More precise difficulty
+                'difficulty' => 20 * 1000000,
                 'block_reward' => 12.5,
                 'blocks_per_day' => 576, // ~2.5 minutes per block
             ],
             'X11' => [
                 'symbol' => 'DASH',
                 'name' => 'Dash',
-                'difficulty' => 5.094 * 1000000, // More precise difficulty
+                'difficulty' => 5 * 1000000,
                 'block_reward' => 3.11,
                 'blocks_per_day' => 576, // ~2.5 minutes per block
             ],
             'RandomX' => [
                 'symbol' => 'XMR',
                 'name' => 'Monero',
-                'difficulty' => 30000, // Completely revised difficulty value for RandomX
-                'block_reward' => 0.6, // Current Monero block reward
+                'difficulty' => 3 * 1000000,
+                'block_reward' => 0.8,
                 'blocks_per_day' => 720, // ~2 minutes per block
             ],
         ];
@@ -340,7 +258,7 @@ class MiningController extends Controller
     /**
      * Calculate daily mining reward in cryptocurrency
      * 
-     * @param float $hashrate Hashrate (normalized according to algorithm)
+     * @param float $hashrate Hashrate in TH/s
      * @param float $difficulty Network difficulty
      * @param float $blockReward Block reward
      * @param int $blocksPerDay Blocks mined per day
@@ -349,57 +267,10 @@ class MiningController extends Controller
      */
     private function calculateDailyReward($hashrate, $difficulty, $blockReward, $blocksPerDay, $poolFee)
     {
-        // Special calculation for Monero (RandomX) which uses H/s instead of TH/s
-        if ($blockReward == 0.6) { // Monero block reward
-            // COMPLETELY NEW APPROACH FOR MONERO:
-            // Instead of using complex formulas that may not scale correctly,
-            // we'll use a simplified but reliable approach with fixed coefficients
-            
-            // Convert hashrate to H/s for Monero/RandomX calculations
-            $hashrateInH = 0;
-            
-            // Special handling based on unit that was likely used
-            if ($hashrate < 0.001) {
-                // User probably entered value in H/s thinking it was TH/s
-                $hashrateInH = $hashrate * 1000000000000;
-            } else if ($hashrate < 1) {
-                // User probably entered value in KH/s thinking it was TH/s
-                $hashrateInH = $hashrate * 1000000000;
-            } else if ($hashrate < 1000) {
-                // User probably entered value in MH/s thinking it was TH/s
-                $hashrateInH = $hashrate * 1000000;
-            } else {
-                // User probably entered value in GH/s or TH/s
-                $hashrateInH = $hashrate * 1000;
-            }
-            
-            // Known reference values for Monero (conservative estimates):
-            // 1000 H/s ≈ 0.00042 XMR per day
-            // Scale appropriately for user's hashrate
-            $dailyReward = ($hashrateInH / 1000) * 0.00042;
-            
-            // Apply pool fee
-            $rewardAfterFee = $dailyReward * (1 - $poolFee);
-            
-            // Enforce a minimum non-zero value
-            if ($rewardAfterFee < 0.00000001) {
-                $rewardAfterFee = 0.00000001;
-            }
-            
-            // Log detailed calculation steps
-            Log::info("Monero mining reward calculation (direct method):", [
-                'original_hashrate' => $hashrate,
-                'converted_hashrate_h' => $hashrateInH,
-                'daily_reward_before_fee' => $dailyReward,
-                'pool_fee' => $poolFee,
-                'daily_reward_after_fee' => $rewardAfterFee
-            ]);
-            
-            return $rewardAfterFee;
-        }
-        
-        // Standard calculation for other algorithms
+        // Calculate share of daily blocks based on your hashrate vs network difficulty
         $yourShareOfBlocks = ($hashrate / $difficulty) * $blocksPerDay;
+        
+        // Calculate rewards and apply pool fee
         $rewards = $yourShareOfBlocks * $blockReward;
         $rewardsAfterFee = $rewards * (1 - $poolFee);
         
@@ -416,10 +287,9 @@ class MiningController extends Controller
     private function calculatePowerCost($powerConsumption, $electricityCost)
     {
         // Convert watts to kilowatts and calculate daily consumption
-        // High precision calculation to avoid cumulative rounding errors
         $dailyPowerUsage = ($powerConsumption / 1000) * 24; // kWh per day
         
-        // Calculate daily power cost with full precision
+        // Calculate daily power cost
         $dailyCost = $dailyPowerUsage * $electricityCost;
         
         return $dailyCost;
@@ -496,11 +366,11 @@ class MiningController extends Controller
     private function getFallbackPrices()
     {
         return [
-            'BTC' => 60000,    // Updated fallback Bitcoin price
-            'ETH' => 3500,     // Updated fallback Ethereum price
-            'LTC' => 80,       // Updated fallback Litecoin price
-            'DASH' => 30,      // Updated fallback Dash price
-            'XMR' => 180,      // Updated fallback Monero price
+            'BTC' => 10000,
+            'ETH' => 1000,
+            'LTC' => 100,
+            'DASH' => 10,
+            'XMR' => 100,
             'timestamp' => time(),
             'is_fallback' => true
         ];
