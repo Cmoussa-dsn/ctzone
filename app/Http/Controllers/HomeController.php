@@ -30,9 +30,7 @@ class HomeController extends Controller
      */
     public function buy()
     {
-        $products = Product::where('category_id', '!=', 1)
-                        ->with('category')
-                        ->get();
+        $products = Product::with('category')->get();
         
         return view('buy', compact('products'));
     }
