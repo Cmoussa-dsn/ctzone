@@ -1,4 +1,7 @@
-FROM php:8.1-apache as builder
+FROM php:8.1-apache
+
+# Set working directory
+WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -10,47 +13,9 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    curl \
     nodejs \
-    npm
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Set working directory
-WORKDIR /app
-
-# Copy composer files
-COPY composer.json composer.lock ./
-
-# Install dependencies without running scripts or autoloader
-RUN composer install --no-scripts --no-autoloader --ignore-platform-reqs
-
-# Copy the rest of the application
-COPY . .
-
-# Generate optimized autoloader and run scripts
-RUN composer dump-autoload --optimize --no-dev
-RUN npm install && npm run build
-
-# Generate key and optimize
-RUN php artisan package:discover --ansi
-
-# Second stage for a clean production image
-FROM php:8.1-apache
-
-# Install system dependencies and PHP extensions
-RUN apt-get update && apt-get install -y \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev
+    npm \
+    curl
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
@@ -58,14 +23,25 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
 # Enable Apache rewrite module
 RUN a2enmod rewrite
 
-# Set working directory
-WORKDIR /var/www/html
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files from builder
-COPY --from=builder /app /var/www/html
+# Copy application files
+COPY . .
 
-# Copy environment file and set permissions
+# Fix composer dependencies
+RUN rm -f composer.lock
+RUN composer require laravel/framework laravel/sanctum --with-all-dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+# Install NPM dependencies and build assets
+RUN npm ci || npm install
+RUN npm run build
+
+# Copy environment file
 RUN cp .env.example .env
+
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
