@@ -3,6 +3,10 @@ FROM php:8.1-apache
 # Set working directory
 WORKDIR /var/www/html
 
+# Set environment variables to allow Composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_NO_INTERACTION=1
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
@@ -26,27 +30,30 @@ RUN a2enmod rewrite
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files
+# Copy composer files first
+COPY composer.json ./
+
+# Install Laravel packages without the lock file constraints
+RUN composer require laravel/framework --no-update
+RUN composer require laravel/sanctum --no-update
+
+# Copy the rest of the application
 COPY . .
 
-# Fix composer dependencies
-RUN rm -f composer.lock
-RUN composer require laravel/framework laravel/sanctum --with-all-dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Install NPM dependencies and build assets
-RUN npm ci || npm install
+RUN npm install
 RUN npm run build
 
-# Copy environment file
+# Configure Laravel
 RUN cp .env.example .env
+RUN php artisan key:generate
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Generate application key
-RUN php artisan key:generate
 
 # Configure Apache
 RUN echo '<VirtualHost *:80>\n\
