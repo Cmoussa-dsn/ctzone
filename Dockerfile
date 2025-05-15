@@ -1,71 +1,66 @@
-FROM php:8.1-apache
+FROM php:8.1-fpm
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Set environment variables to allow Composer to run as root
+# Set environment variables
 ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_NO_INTERACTION=1
+ENV COMPOSER_MEMORY_LIMIT=-1 
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    unzip \
-    libzip-dev \
+    curl \
+    libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    nginx \
     nodejs \
     npm \
-    curl
+    supervisor
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
 
-# Enable Apache rewrite module
-RUN a2enmod rewrite
-
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy composer files first
-COPY composer.json ./
+# Copy application files
+COPY . /var/www/html
 
-# Install Laravel packages without the lock file constraints
-RUN composer require laravel/framework --no-update
-RUN composer require laravel/sanctum --no-update
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Copy the rest of the application
-COPY . .
+# Install dependencies one at a time
+RUN cd /var/www/html \
+    && rm -f composer.lock \
+    && composer update --no-scripts \
+    && composer dump-autoload \
+    && npm install \
+    && npm run build
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Configure Nginx
+COPY docker/nginx.conf /etc/nginx/sites-available/default
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Install NPM dependencies and build assets
-RUN npm install
-RUN npm run build
+# Copy PHP-FPM configuration
+COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Copy supervisor configuration
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Configure Laravel
-RUN cp .env.example .env
-RUN php artisan key:generate
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Configure Apache
-RUN echo '<VirtualHost *:80>\n\
-    DocumentRoot /var/www/html/public\n\
-    <Directory /var/www/html/public>\n\
-        AllowOverride All\n\
-        Require all granted\n\
-    </Directory>\n\
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+RUN cp .env.example .env \
+    && php artisan key:generate
 
 # Expose port 80
 EXPOSE 80
 
-# Start Apache server
-CMD ["apache2-foreground"] 
+# Start services
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
