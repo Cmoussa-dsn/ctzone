@@ -26,7 +26,13 @@ RUN a2enmod rewrite
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files
+# Copy composer files first for better layer caching
+COPY composer.json composer.lock ./
+
+# Update composer dependencies
+RUN composer update --no-scripts --no-autoloader
+
+# Copy the rest of the application files
 COPY . .
 
 # Install dependencies
