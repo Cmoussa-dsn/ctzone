@@ -1,12 +1,8 @@
-FROM php:8.1-fpm
-
-# Set working directory
-WORKDIR /var/www/html
+FROM php:8.1-apache
 
 # Set environment variables
 ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_MEMORY_LIMIT=-1 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -18,49 +14,44 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
-    nginx \
     nodejs \
-    npm \
-    supervisor
+    npm
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip gd
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Set the Apache document root
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy application files
-COPY . /var/www/html
+# Copy source code
+COPY . /var/www/html/
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Set working directory
+WORKDIR /var/www/html
 
-# Install dependencies one at a time
-RUN cd /var/www/html \
-    && rm -f composer.lock \
-    && composer update --no-scripts \
-    && composer dump-autoload \
-    && npm install \
-    && npm run build
+# Install dependencies without running scripts
+RUN composer install --no-scripts
 
-# Configure Nginx
-COPY docker/nginx.conf /etc/nginx/sites-available/default
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy PHP-FPM configuration
-COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
+# Copy environment file
+RUN cp .env.example .env
 
-# Copy supervisor configuration
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Configure Laravel
-RUN cp .env.example .env \
-    && php artisan key:generate
+# Generate application key
+RUN php artisan key:generate
 
 # Expose port 80
 EXPOSE 80
 
-# Start services
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
+# Start Apache server
+CMD ["apache2-foreground"] 
