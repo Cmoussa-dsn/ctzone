@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctzone-app
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - ctzone
+
+  db:
+    image: mysql:8.0
+    container_name: ctzone-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ctzone
+
+networks:
+  ctzone:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local 
