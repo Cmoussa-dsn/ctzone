@@ -11,7 +11,7 @@ use Carbon\Carbon;
  */
 function getSalesDataForDashboard()
 {
-    // Get sales for the last 30 days
+    // jib sales la 30d
     $startDate = Carbon::now()->subDays(29)->startOfDay();
     $endDate = Carbon::now()->endOfDay();
     
@@ -26,7 +26,7 @@ function getSalesDataForDashboard()
     ->orderBy('date')
     ->get();
     
-    // Format the data for Chart.js
+   
     $dates = [];
     $orderCounts = [];
     $salesTotals = [];
@@ -39,7 +39,7 @@ function getSalesDataForDashboard()
         $salesTotals[$date] = 0;
     }
     
-    // Fill in actual data
+    
     foreach ($dailySales as $sale) {
         $date = $sale->date;
         $orderCounts[$date] = $sale->order_count;

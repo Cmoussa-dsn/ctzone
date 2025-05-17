@@ -14,9 +14,7 @@ use App\Models\OrderItem;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+    
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -24,9 +22,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
+    
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $request->user()->fill($request->validated());
@@ -40,9 +36,7 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
+    
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -61,15 +55,13 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    /**
-     * Display the user's custom PC builds.
-     */
+    
     public function customBuilds(Request $request): View
     {
         $user = $request->user();
         
-        // Find custom PC products owned by this user
-        // First, find in active cart
+        // awal shi bedna nchayek eza mnle2e custom pc prds lal user
+        // awal shi mnchuf bl cart tabaao
         $cartCustomPCs = CartItem::where('user_id', $user->id)
             ->whereHas('product', function($query) {
                 $query->where('type', 'custom_pc');
@@ -77,7 +69,7 @@ class ProfileController extends Controller
             ->with('product')
             ->get();
             
-        // Then, find in completed orders
+        // tene shi bl orders l kemlin
         $orderCustomPCs = OrderItem::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })

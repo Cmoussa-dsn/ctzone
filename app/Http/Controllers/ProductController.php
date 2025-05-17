@@ -14,11 +14,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
-    {
-        $products = Product::with('category')->get();
-        return view('admin.products.index', compact('products'));
-    }
+    
 
     /**
      * Show the form for creating a new product.
@@ -94,7 +90,7 @@ class ProductController extends Controller
         $data = $request->except('image');
 
         if ($request->hasFile('image')) {
-            // Delete old image if it exists
+           
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }

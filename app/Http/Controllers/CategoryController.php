@@ -94,7 +94,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        // Check if category has products
+        // chuf eza category fiya prd
         if ($category->products()->count() > 0) {
             return Redirect::route('admin.categories.index')
                 ->with('error', 'Cannot delete category with associated products');

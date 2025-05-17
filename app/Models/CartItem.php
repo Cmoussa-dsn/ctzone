@@ -21,19 +21,5 @@ class CartItem extends Model
         'quantity',
     ];
 
-    /**
-     * Get the user that owns the cart item.
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the product for the cart item.
-     */
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
+    
 }

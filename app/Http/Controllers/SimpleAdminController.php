@@ -10,19 +10,9 @@ use Illuminate\Support\Facades\Auth;
 
 class SimpleAdminController extends Controller
 {
-    public function __construct()
-    {
-        // No constructor logic to avoid dependency injection issues
-    }
     
-    public function index()
-    {
-        if (!Auth::check() || Auth::user()->role_id != 1) {
-            return redirect('/')->with('error', 'Unauthorized.');
-        }
-        
-        return redirect()->route('admin.direct-dashboard');
-    }
+    
+    
     
     public function dashboard()
     {
@@ -38,7 +28,7 @@ class SimpleAdminController extends Controller
             ->take(5)
             ->get();
             
-        // Simple sales data
+        
         $salesData = [
             'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
             'orderCounts' => [5, 10, 15, 20, 25],

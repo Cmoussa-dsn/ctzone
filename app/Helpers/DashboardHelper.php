@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class DashboardHelper
 {
     /**
-     * Get sales data for the dashboard chart
+     * jib sales data mn dahboard
      * 
      * @param string $period Period to get data for (7days, 30days, 90days, year)
      * @return array
@@ -35,7 +35,7 @@ class DashboardHelper
             $endDate = Carbon::now()->endOfDay();
             
             if ($period === 'year') {
-                // Monthly aggregation for year view
+                
                 $dailySales = Order::select(
                     DB::raw('DATE_FORMAT(created_at, "%Y-%m") as date'),
                     DB::raw('COUNT(*) as order_count'),
@@ -52,7 +52,7 @@ class DashboardHelper
                 $orderCounts = [];
                 $salesTotals = [];
                 
-                // Generate array of month-years
+                
                 $current = Carbon::now()->startOfMonth();
                 $months = [];
                 for ($i = 0; $i < 12; $i++) {
@@ -62,7 +62,7 @@ class DashboardHelper
                     $salesTotals[$month] = 0;
                 }
                 
-                // Fill in actual data
+                // fill the data 
                 foreach ($dailySales as $sale) {
                     $orderCounts[$sale->date] = $sale->order_count;
                     $salesTotals[$sale->date] = $sale->total_sales;
@@ -74,7 +74,7 @@ class DashboardHelper
                     'salesTotals' => array_values($salesTotals)
                 ];
             } else {
-                // Daily aggregation for other views
+                
                 $dailySales = Order::select(
                     DB::raw('DATE(created_at) as date'),
                     DB::raw('COUNT(*) as order_count'),
@@ -86,7 +86,7 @@ class DashboardHelper
                 ->orderBy('date')
                 ->get();
                 
-                // Format the data for Chart.js
+             
                 $dates = [];
                 $orderCounts = [];
                 $salesTotals = [];
@@ -100,7 +100,7 @@ class DashboardHelper
                     $salesTotals[$date] = 0;
                 }
                 
-                // Fill in actual data
+                
                 foreach ($dailySales as $sale) {
                     $date = $sale->date;
                     $orderCounts[$date] = $sale->order_count;
@@ -116,7 +116,7 @@ class DashboardHelper
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error generating sales data: ' . $e->getMessage());
             
-            // Return empty data in case of error
+            // Return 0 in case of error
             return [
                 'labels' => [],
                 'orderCounts' => [],

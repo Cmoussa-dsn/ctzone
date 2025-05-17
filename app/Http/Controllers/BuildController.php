@@ -18,7 +18,7 @@ class BuildController extends Controller
      */
     public function index()
     {
-        // Get components for PC building from database
+       
         $components = [
             'processors' => $this->getComponentsByType('processors'),
             'motherboards' => $this->getComponentsByType('motherboards'),
@@ -33,12 +33,10 @@ class BuildController extends Controller
         return view('build.index', compact('components'));
     }
     
-    /**
-     * New PC Builder page with clean implementation
-     */
+    
     public function pcBuilder()
     {
-        // Get components for PC building from database
+       
         $components = [
             'processors' => $this->getComponentsByType('processors'),
             'motherboards' => $this->getComponentsByType('motherboards'),
@@ -53,9 +51,7 @@ class BuildController extends Controller
         return view('pc-builder', compact('components'));
     }
     
-    /**
-     * Store a custom PC build in the cart
-     */
+  
     public function store(Request $request)
     {
         $request->validate([
@@ -70,17 +66,16 @@ class BuildController extends Controller
             'total_price' => 'required|numeric'
         ]);
         
-        // First, we need to handle creating a virtual product for the custom PC build
-        // Get the processor component as the base product
+        
         $processorId = $request->processor;
         $processor = null;
         
-        // Try to find the processor component in the database
+       
         if (is_numeric($processorId)) {
             $processor = Product::find($processorId);
         }
         
-        // If processor is not found or is a demo component, create a new product for the custom PC
+        
         if (!$processor) {
             // Create a temporary product for the custom PC
             $product = Product::create([
@@ -92,7 +87,7 @@ class BuildController extends Controller
                 'type' => 'custom_pc',
             ]);
         } else {
-            // Create a custom PC product based on the processor
+           
             $product = Product::create([
                 'name' => 'Custom PC with ' . $processor->name,
                 'category_id' => 2, // Gaming PCs category
@@ -103,10 +98,10 @@ class BuildController extends Controller
             ]);
         }
         
-        // Create a custom build ID
+        
         $buildId = 'custom-' . time();
         
-        // Store PC configuration in session
+        
         session([
             'custom_pc' => [
                 'id' => $buildId,
@@ -137,16 +132,13 @@ class BuildController extends Controller
             ->with('success', 'Custom PC has been added to your cart!');
     }
     
-    /**
-     * Get components by type from the database
-     * Try to find by type first, then by category name
-     */
+    
     private function getComponentsByType($type)
     {
-        // Try to find components by type field
+        
         $components = Product::where('type', $type)->get();
         
-        // If no components found by type, try to find by category
+        
         if ($components->isEmpty()) {
             // Map of type to possible category names
             $categoryMap = [
@@ -160,10 +152,10 @@ class BuildController extends Controller
                 'cooling' => ['Cooling', 'CPU Coolers', 'PC Parts']
             ];
             
-            // Get categories that could match this component type
+        
             $possibleCategories = $categoryMap[$type] ?? ['PC Parts'];
             
-            // Find category IDs
+            
             $categoryIds = Category::whereIn('name', $possibleCategories)->pluck('id')->toArray();
             
             if (!empty($categoryIds)) {
@@ -171,7 +163,7 @@ class BuildController extends Controller
             }
         }
         
-        // If still no components found, use demo components
+        
         if ($components->isEmpty()) {
             return $this->getDemoComponents($type);
         }
@@ -179,10 +171,7 @@ class BuildController extends Controller
         return $components;
     }
     
-    /**
-     * Get demo components when database is empty
-     * This serves as a fallback method
-     */
+    
     private function getDemoComponents($type)
     {
         $demoComponents = [

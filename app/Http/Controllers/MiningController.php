@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 class MiningController extends Controller
 {
     /**
-     * Display the mining homepage.
      *
      * @return \Illuminate\View\View
      */
@@ -31,8 +30,7 @@ class MiningController extends Controller
             ->take(3)
             ->get();
             
-        // Get accessories - either from products explicitly named as accessories
-        // or products with N/A algorithm which indicates they're not miners
+        
         $accessories = MiningProduct::where('algorithm', 'N/A')
             ->orWhereIn('name', ['Mining Rig Frame', 'Bitmain Power Supply APW9+', 'Immersion Cooling Kit'])
             ->take(3)
@@ -54,15 +52,15 @@ class MiningController extends Controller
      */
     public function products(Request $request): View
     {
-        // Get filter parameters
+        
         $priceRange = $request->input('price_range');
         $sortBy = $request->input('sort_by', 'featured');
         $filterType = $request->input('filter_type', 'all');
         
-        // Initialize base query
+       
         $query = MiningProduct::query();
         
-        // Apply filter by type
+        
         if ($filterType !== 'all') {
             switch ($filterType) {
                 case 'ASIC':
@@ -78,14 +76,14 @@ class MiningController extends Controller
             }
         }
         
-        // Apply price range filter
+        
         if ($priceRange) {
             $prices = explode('-', $priceRange);
             if (count($prices) == 2) {
                 $minPrice = (float) $prices[0];
                 $maxPrice = (float) $prices[1];
                 
-                // If maxPrice is 0, it means no upper limit (e.g., "2000+")
+                
                 if ($maxPrice > 0) {
                     $query->whereBetween('price', [$minPrice, $maxPrice]);
                 } else {
@@ -94,7 +92,7 @@ class MiningController extends Controller
             }
         }
         
-        // Apply sorting
+       
         switch ($sortBy) {
             case 'price-low':
                 $query->orderBy('price', 'asc');
@@ -106,9 +104,9 @@ class MiningController extends Controller
                 $query->orderBy('created_at', 'desc');
                 break;
             case 'hashrate-high':
-                // Special case for hashrate sorting
-                // First, sort by products with numeric hashrate in descending order
-                // For accessories with N/A hashrate, put them at the end
+                // case lal hashrate
+                //sort products hashrate descending
+                // n/a products hotoun at the end
                 $query->orderByRaw("CASE WHEN hashrate = 'N/A' THEN 1 ELSE 0 END")
                       ->orderBy('price', 'desc'); // Fallback for accessories with N/A hashrate
                 break;
@@ -125,7 +123,7 @@ class MiningController extends Controller
     }
     
     /**
-     * Display a single mining product.
+     * display la mining product wahad
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -134,8 +132,8 @@ class MiningController extends Controller
     {
         $product = MiningProduct::findOrFail($id);
         
-        // For products with N/A algorithm, show related accessories
-        // Otherwise, show related mining products
+       
+        
         if ($product->algorithm === 'N/A') {
             $relatedProducts = MiningProduct::where('id', '!=', $id)
                 ->where('algorithm', 'N/A')
@@ -156,20 +154,19 @@ class MiningController extends Controller
     }
     
     /**
-     * Display the mining calculator page.
      *
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function calculator()
     {
-        // Require authentication for the calculator
+       //beddna login la nchyik aal calculator
         if (!Auth::check()) {
             return redirect()->route('login')->with('message', 'Please login to access the mining calculator.');
         }
         
         $miningProducts = MiningProduct::whereNotIn('hashrate', ['N/A'])->get();
         
-        // Get cryptocurrency prices for display on the calculator page
+        // jib crypto prices to display aal calc
         $cryptoPrices = Cache::remember('crypto_prices', 300, function () {
             return $this->getCryptoPrices();
         });
@@ -185,7 +182,7 @@ class MiningController extends Controller
      */
     public function calculateProfitability(Request $request)
     {
-        // Validate the request data
+        // Validate inputs data the user enterd
         $validated = $request->validate([
             'hashrate' => 'required|numeric|min:0',
             'hashrate_unit' => 'required|string|in:TH,GH,MH,KH',
@@ -196,19 +193,19 @@ class MiningController extends Controller
             'price_refresh_only' => 'nullable|boolean'
         ]);
         
-        // If this is just a price refresh request, return the current prices
+        // if only rfrsh rtrn prices current
         if (isset($validated['price_refresh_only']) && $validated['price_refresh_only']) {
             return response()->json([
                 'prices' => $this->getCryptoPrices()
             ]);
         }
         
-        // Get crypto prices from cache or API
+        // Get crypto prices from api
         $cryptoPrices = Cache::remember('crypto_prices', 300, function () {
             return $this->getCryptoPrices();
         });
         
-        // Extract user inputs
+        
         $hashrateValue = $validated['hashrate'];
         $hashrateUnit = $validated['hashrate_unit'];
         $algorithm = $validated['algorithm'];
@@ -216,99 +213,94 @@ class MiningController extends Controller
         $electricityCost = $validated['electricity_cost'];
         $poolFeePercentage = $validated['pool_fee'] / 100;
         
-        // Calculate daily rewards based on algorithm and hashrate
-        // Using direct reference values based on current mining profitability
+        
         $dailyReward = 0;
         $cryptoSymbol = '';
         
         switch ($algorithm) {
             case 'SHA-256':
                 $cryptoSymbol = 'BTC';
-                // For SHA-256 mining (Bitcoin)
-                // Convert to TH/s as standard unit for BTC mining
+                
+                
                 $hashrateInTH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'TH');
                 
-                // Real-world reference: 1 TH/s ≈ 0.000008 BTC per day
-                // Increased to 0.00005 BTC per day for better visibility in MH/s range
+                
+                
                 $dailyReward = $hashrateInTH * 0.0000005;
                 break;
                 
             case 'Ethash':
                 $cryptoSymbol = 'ETH';
-                // For Ethash mining (Ethereum/ETC)
-                // Convert to MH/s as standard unit for ETH mining
+                
+                
                 $hashrateInMH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'MH');
                 
-                // Real-world reference enhanced for better visibility
-                // 100 MH/s ≈ 0.003 ETH per day
+                
+                
                 $dailyReward = ($hashrateInMH / 100) * 0.00003;
                 break;
                 
             case 'Scrypt':
                 $cryptoSymbol = 'LTC';
-                // For Scrypt mining (Litecoin)
-                // Convert to MH/s as standard unit for LTC mining
+                
                 $hashrateInMH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'MH');
                 
-                // Real-world reference enhanced for better visibility
-                // 100 MH/s ≈ 0.03 LTC per day
+                
+               
                 $dailyReward = ($hashrateInMH / 100) * 0.00003;
                 break;
                 
             case 'X11':
                 $cryptoSymbol = 'DASH';
-                // For X11 mining (Dash)
-                // Convert to GH/s as standard unit for DASH mining
+                
+                
                 $hashrateInGH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'GH');
                 
-                // Real-world reference enhanced for better visibility
-                // 1 GH/s ≈ 0.002 DASH per day
                 $dailyReward = $hashrateInGH * 0.000002;
                 break;
                 
             case 'RandomX':
                 $cryptoSymbol = 'XMR';
-                // For RandomX mining (Monero)
-                // Convert to H/s as standard unit for XMR mining
+                
+                
                 $hashrateInH = $this->convertToStandardUnit($hashrateValue, $hashrateUnit, 'H');
                 
-                // Real-world reference enhanced for better visibility
-                // 10000 H/s ≈ 0.008 XMR per day
+                
                 $dailyReward = ($hashrateInH / 10000) * 0.000008;
                 break;
                 
             default:
-                // Fallback
+                
                 $cryptoSymbol = 'BTC';
                 $dailyReward = 0.00000001;
         }
         
-        // Apply pool fee
+        // applying el pool fee 1-2-3%
         $dailyReward = $dailyReward * (1 - $poolFeePercentage);
         
-        // Get cryptocurrency price
+        
         $cryptoPrice = $cryptoPrices[$cryptoSymbol] ?? $this->getFallbackPrices()[$cryptoSymbol];
         
-        // Calculate rewards in USD
+        
         $dailyRewardUsd = $dailyReward * $cryptoPrice;
         
-        // Calculate power costs
+        
         $dailyPowerCost = ($powerConsumption / 1000) * 24 * $electricityCost; // kWh per day * cost per kWh
         
-        // Calculate profit
+        
         $dailyProfit = $dailyRewardUsd - $dailyPowerCost;
         $monthlyProfit = $dailyProfit * 30;
         $yearlyProfit = $dailyProfit * 365;
         
-        // Calculate monthly and yearly costs
+        
         $monthlyPowerCost = $dailyPowerCost * 30;
         $yearlyPowerCost = $dailyPowerCost * 365;
         
-        // Calculate monthly and yearly crypto rewards
+       
         $monthlyReward = $dailyReward * 30;
         $yearlyReward = $dailyReward * 365;
         
-        // Log calculation details for debugging
+        
         Log::info("Mining profitability calculation", [
             'algorithm' => $algorithm,
             'hashrate' => $hashrateValue . ' ' . $hashrateUnit,
@@ -338,8 +330,7 @@ class MiningController extends Controller
         ]);
     }
     
-    /**
-     * Convert hashrate to standard unit used for each algorithm
+    /** 
      *
      * @param float $value Original hashrate value
      * @param string $fromUnit Original unit (TH, GH, MH, KH)
@@ -348,7 +339,7 @@ class MiningController extends Controller
      */
     private function convertToStandardUnit($value, $fromUnit, $toUnit)
     {
-        // Define conversion factors (to H/s)
+        
         $toHs = [
             'KH' => 1000,
             'MH' => 1000000,
@@ -357,10 +348,10 @@ class MiningController extends Controller
             'H' => 1
         ];
         
-        // First convert to H/s
+        
         $valueInHs = $value * $toHs[$fromUnit];
         
-        // Then convert to target unit
+        
         $result = $valueInHs / $toHs[$toUnit];
         
         return $result;

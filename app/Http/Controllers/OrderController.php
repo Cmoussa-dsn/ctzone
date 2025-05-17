@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     /**
-     * Display order history for the authenticated user.
+     *order history lal user
      *
      * @return \Illuminate\View\View
      */
@@ -26,7 +26,6 @@ class OrderController extends Controller
     }
     
     /**
-     * Display a specific order with its items.
      *
      * @param  \App\Models\Order  $order
      * @return \Illuminate\View\View
@@ -45,8 +44,6 @@ class OrderController extends Controller
     }
     
     /**
-     * Process the checkout and create a new order.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -81,14 +78,14 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             
-            // Create the order
+            
             $order = Order::create([
                 'user_id' => $userId,
                 'total_price' => $totalPrice,
                 'status' => 'pending'
             ]);
             
-            // Create order items
+            
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -98,7 +95,7 @@ class OrderController extends Controller
                 ]);
             }
             
-            // Clear the cart
+            
             CartItem::where('user_id', $userId)->delete();
             
             DB::commit();

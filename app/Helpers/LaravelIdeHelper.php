@@ -1,11 +1,6 @@
 <?php
 
-/**
- * Laravel IDE Helper
- * 
- * This file provides IDE autocomplete for Laravel's global functions and facades
- * It doesn't actually do anything at runtime - it's only for IDE static analysis
- */
+
 
 if (!function_exists('view')) {
     /**

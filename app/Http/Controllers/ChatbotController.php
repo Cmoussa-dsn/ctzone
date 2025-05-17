@@ -51,13 +51,13 @@ class ChatbotController extends Controller
                 return response()->json(['error' => 'API key configuration error'], 500);
             }
 
-            // Get conversation history
+           
             $history = $this->getConversationHistory();
             
-            // Get database information to provide to the AI
+           
             $dbInfo = $this->getDatabaseInfo($message);
 
-            // Create system message to guide the AI's behavior
+            
             $systemMessage = "You are a helpful computer store assistant for CT ZONE, a computer store in Lebanon, Tripoli. 
             Your name is CT ZONE Assistant.
             Only answer questions related to computers, PC components, and CT ZONE products and services.
@@ -72,20 +72,20 @@ class ChatbotController extends Controller
             Key services: PC Building, PC Repair, Technical Support, Component Upgrades.
             Contact info: +961 71 64 87 44, located in Tripoli, Lebanon.";
 
-            // Create messages array with system, history, and current message
+            
             $messages = [
                 ['role' => 'system', 'content' => $systemMessage],
             ];
             
-            // Add conversation history if any exists
+            
             foreach ($history as $item) {
                 $messages[] = $item;
             }
             
-            // Add the current user message
+            // hot lal user msg (currntly)
             $messages[] = ['role' => 'user', 'content' => $message];
 
-            // Make request to OpenAI API with timeout
+           
             $response = Http::timeout($this->timeout)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
@@ -103,7 +103,7 @@ class ChatbotController extends Controller
                 $aiMessage = $responseData['choices'][0]['message']['content'] ?? null;
                 
                 if ($aiMessage) {
-                    // Save the conversation to history
+                    
                     $this->addToConversationHistory($message, $aiMessage);
                     
                     // Log successful response for monitoring
@@ -115,7 +115,8 @@ class ChatbotController extends Controller
                 return response()->json(['error' => 'No response from AI', 'user_message' => 'I apologize, but I couldn\'t generate a response. Please try asking in a different way.'], 500);
             }
             
-            // Handle specific API error responses
+            // handling la kam api error messages
+        
             $statusCode = $response->status();
             $errorBody = $response->json();
             $errorType = $errorBody['error']['type'] ?? 'unknown_error';
@@ -128,7 +129,7 @@ class ChatbotController extends Controller
                 'user_query' => $message
             ]);
             
-            // Provide appropriate user-facing messages based on error type
+            // Provide  user facing msg based on error tp
             $userMessage = 'I\'m having trouble connecting to my knowledge base. Please try again in a moment.';
             
             if ($statusCode === 429) {
@@ -156,61 +157,53 @@ class ChatbotController extends Controller
         }
     }
 
-    /**
-     * Get the conversation history from session
-     */
+    
     private function getConversationHistory()
     {
         return Session::get('chatbot_history', []);
     }
 
-    /**
-     * Add the current conversation to history
-     */
+    
     private function addToConversationHistory($userMessage, $aiMessage)
     {
         $history = $this->getConversationHistory();
         
-        // Add current messages
+        
         $history[] = ['role' => 'user', 'content' => $userMessage];
         $history[] = ['role' => 'assistant', 'content' => $aiMessage];
         
-        // Keep only the last X messages to avoid token limits
+        // Khalle ekher 2 msgs kermel ma n2atte3 token limits
         if (count($history) > $this->maxHistoryMessages * 2) {
             $history = array_slice($history, -$this->maxHistoryMessages * 2);
         }
         
-        // Save back to session
+        // hotta nel session mn baad ma nkhalles msging
         Session::put('chatbot_history', $history);
     }
 
-    /**
-     * Get relevant information from the database based on user query
-     */
     private function getDatabaseInfo($message)
     {
         $info = [];
         $message = strtolower($message);
 
-        // Check if user is asking for recommendations
+        
         $isRecommendationQuery = $this->isRecommendationQuery($message);
         if ($isRecommendationQuery) {
             $info[] = "Customer is asking for product recommendations.";
         }
 
-        // Get product count
         $totalProducts = Product::count();
         $info[] = "Total products available: {$totalProducts}";
 
-        // Get categories
+       
         $categories = Category::all();
         $categoryList = "Product categories: " . $categories->pluck('name')->join(', ');
         $info[] = $categoryList;
 
-        // Check if query is about specific products or categories
+        
         $productsQuery = Product::query();
         
-        // Check for specific product queries
+        
         if (strpos($message, 'gaming') !== false || 
             strpos($message, 'gaming pc') !== false || 
             strpos($message, 'gaming computer') !== false) {
@@ -226,7 +219,7 @@ class ChatbotController extends Controller
             $productsQuery->where('name', 'like', '%laptop%')->orWhere('description', 'like', '%laptop%');
         }
         
-        // Check for component queries
+        
         foreach (['gpu', 'graphics card', 'cpu', 'processor', 'ram', 'memory', 'motherboard', 'storage', 'ssd', 'hdd'] as $term) {
             if (strpos($message, $term) !== false) {
                 $productsQuery->where('name', 'like', '%' . $term . '%')
@@ -235,7 +228,7 @@ class ChatbotController extends Controller
             }
         }
         
-        // Fetch products that match the query
+        // nabish aal  products li bl query
         $products = $productsQuery->take(5)->get();
         
         if ($products->count() > 0) {
@@ -244,7 +237,7 @@ class ChatbotController extends Controller
                 $info[] = "- {$product->name}: \${$product->price} - {$product->description}";
             }
         } else {
-            // Get some popular products if no specific products were found
+            // jib aham prd eza ma le2a specific product bl query
             $popularProducts = Product::orderBy('id', 'desc')->take(3)->get();
             $info[] = "Some of our products:";
             foreach ($popularProducts as $product) {
@@ -257,7 +250,7 @@ class ChatbotController extends Controller
         $maxPrice = Product::max('price');
         $info[] = "Our products range in price from \${$minPrice} to \${$maxPrice}.";
         
-        // Get recent orders if asking about popularity
+        //  jib ekher order eza aam yeseal aan l popularity lal product
         if (strpos($message, 'popular') !== false || strpos($message, 'best selling') !== false || 
             strpos($message, 'top') !== false) {
             // This is a simplified approach - in a real system you'd count order items by product
@@ -279,9 +272,9 @@ class ChatbotController extends Controller
             }
         }
         
-        // If asking for recommendations, provide more detailed information
+        // eza aam yeseal aan recommends 3ti aktar details
         if ($isRecommendationQuery) {
-            // Add budget-specific product recommendations if budget is mentioned
+            //  hott aya budget eza saeal
             if (preg_match('/(\$|usd|dollar|price|cost|budget|under|below|around|about)\s*(\d+)/', $message, $matches)) {
                 $budget = (int) $matches[2];
                 $budgetProducts = Product::where('price', '<=', $budget)
@@ -297,14 +290,14 @@ class ChatbotController extends Controller
                 }
             }
             
-            // Add more detailed specifications for popular items if asking about recommendations
+            
             $bestProducts = Product::orderBy('id', 'desc')->take(2)->get();
             foreach ($bestProducts as $product) {
-                // Get category name
+                
                 $categoryName = $product->category ? $product->category->name : 'Uncategorized';
                 $info[] = "Detailed specs for {$product->name} (Category: {$categoryName}):";
                 
-                // Extract and format specifications from description
+                
                 $specs = $this->extractSpecifications($product->description);
                 foreach ($specs as $spec) {
                     $info[] = "  * {$spec}";
@@ -315,9 +308,7 @@ class ChatbotController extends Controller
         return implode("\n", $info);
     }
 
-    /**
-     * Check if the message is PC or computer related
-     */
+    // chuf eza l msg elo 3ale2a bl pcs (pc related)
     private function isPcRelated($message)
     {
         $message = strtolower($message);
@@ -343,7 +334,7 @@ class ChatbotController extends Controller
             }
         }
         
-        // Check for greetings or common customer service queries
+       
         $generalTerms = ['hello', 'hi', 'hey', 'help', 'thanks', 'thank you', 'contact', 'assistance'];
         
         foreach ($generalTerms as $term) {
@@ -355,9 +346,7 @@ class ChatbotController extends Controller
         return false;
     }
 
-    /**
-     * Check if user is asking for product recommendations
-     */
+   
     private function isRecommendationQuery($message)
     {
         $recommendationTerms = [
@@ -376,14 +365,12 @@ class ChatbotController extends Controller
         return false;
     }
     
-    /**
-     * Extract specifications from product description
-     */
+    
     private function extractSpecifications($description)
     {
         $specs = [];
         
-        // Common PC component specifications to look for
+        
         $specPatterns = [
             'CPU' => '/(?:cpu|processor)[:\s]+([^,\.]+)/i',
             'GPU' => '/(?:gpu|graphics)[:\s]+([^,\.]+)/i',
@@ -398,7 +385,7 @@ class ChatbotController extends Controller
             }
         }
         
-        // If no specs were found in the structured way, just split by commas or periods
+        // eza l specs ma la2ehon bl structured way, bas hott fawasel
         if (empty($specs)) {
             $parts = preg_split('/[,\.]/', $description);
             foreach ($parts as $part) {
@@ -412,9 +399,7 @@ class ChatbotController extends Controller
         return $specs;
     }
 
-    /**
-     * Clear the conversation history
-     */
+    
     public function clearConversation(Request $request)
     {
         Session::forget('chatbot_history');

@@ -28,11 +28,5 @@ class AdminServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
-    }
+    
 } 

@@ -45,13 +45,13 @@ class CartController extends Controller
         $productId = $request->product_id;
         $userId = Auth::id();
         
-        // Check if the item already exists in the cart
+        // chuf eza item mwjud bl cart
         $cartItem = CartItem::where('user_id', $userId)
             ->where('product_id', $productId)
             ->first();
             
         if ($cartItem) {
-            // Update quantity
+           
             $cartItem->quantity += 1;
             $cartItem->save();
             
@@ -89,7 +89,7 @@ class CartController extends Controller
         
         $cartItem = CartItem::findOrFail($request->cart_id);
         
-        // Check if the user owns this cart item
+        
         if ($cartItem->user_id !== Auth::id()) {
             return response()->json([
                 'success' => false,
@@ -116,7 +116,7 @@ class CartController extends Controller
     {
         $cartItem = CartItem::findOrFail($id);
         
-        // Check if the user owns this cart item
+        
         if ($cartItem->user_id !== Auth::id()) {
             return redirect()->route('cart.index')
                 ->with('error', 'Unauthorized action');

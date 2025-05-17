@@ -30,18 +30,18 @@ class HomeController extends Controller
      */
     public function buy(Request $request)
     {
-        // Get filter parameters
+        
         $priceRange = $request->input('price_range');
         $sortBy = $request->input('sort_by', 'featured');
         $category = $request->input('category', 'all');
         
-        // Get all categories
+        
         $categories = Category::all();
         
-        // Find category IDs for PC categories (Gaming PCs and Office PCs)
+        
         $pcCategoryIds = $categories->whereIn('name', ['Gaming PCs', 'Office PCs'])->pluck('id')->toArray();
         
-        // Initialize queries for pre-built PCs and components
+       
         $preBuiltQuery = Product::with('category')
             ->whereIn('category_id', $pcCategoryIds)
             ->where(function($query) {
@@ -56,14 +56,14 @@ class HomeController extends Controller
                       ->orWhere('type', '!=', 'custom_pc');
             });
         
-        // Apply price range filter
+        
         if ($priceRange) {
             $prices = explode('-', $priceRange);
             if (count($prices) == 2) {
                 $minPrice = (float) $prices[0];
                 $maxPrice = (float) $prices[1];
                 
-                // If maxPrice is 0, it means no upper limit (e.g., "2000+")
+                //eza max price 0 no limit yeene
                 if ($maxPrice > 0) {
                     $preBuiltQuery->whereBetween('price', [$minPrice, $maxPrice]);
                     $componentsQuery->whereBetween('price', [$minPrice, $maxPrice]);
@@ -74,7 +74,7 @@ class HomeController extends Controller
             }
         }
         
-        // Apply sorting
+        
         switch ($sortBy) {
             case 'price-low':
                 $preBuiltQuery->orderBy('price', 'asc');
@@ -96,15 +96,15 @@ class HomeController extends Controller
                 break;
         }
         
-        // Execute queries
+        
         $preBuiltPCs = $preBuiltQuery->get();
         $components = $componentsQuery->get();
         
-        // Get all filtered products for compatibility with existing code if needed
+        
         $allProducts = $preBuiltPCs->concat($components);
         
         return view('buy', compact('preBuiltPCs', 'components', 'allProducts', 'priceRange', 'sortBy', 'category'));
     }
 
-    // Build-related methods removed
+    
 }
