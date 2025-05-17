@@ -8,12 +8,7 @@ use Carbon\Carbon;
 
 class DashboardHelper
 {
-    /**
-     * jib sales data mn dahboard
-     * 
-     * @param string $period Period to get data for (7days, 30days, 90days, year)
-     * @return array
-     */
+    //jib sales data mn dahboard
     public static function getSalesData($period = '30days')
     {
         try {

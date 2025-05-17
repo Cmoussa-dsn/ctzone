@@ -21,5 +21,12 @@ class CartItem extends Model
         'quantity',
     ];
 
+    /**
+     * Get the product associated with the cart item.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
     
 }

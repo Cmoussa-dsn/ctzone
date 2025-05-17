@@ -34,7 +34,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-                <div class="mb-6">
+                <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Category</label>
                     <select name="category_id" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-green-500 focus:border-green-500" required>
                         <option value="">Select a category</option>
@@ -45,6 +45,24 @@
                     @error('category_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Product Type (for PC Builder)</label>
+                    <select name="type" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-green-500 focus:border-green-500">
+                        <option value="">Not a PC component</option>
+                        <option value="processors" {{ old('type') == 'processors' ? 'selected' : '' }}>Processor (CPU)</option>
+                        <option value="motherboards" {{ old('type') == 'motherboards' ? 'selected' : '' }}>Motherboard</option>
+                        <option value="graphics" {{ old('type') == 'graphics' ? 'selected' : '' }}>Graphics Card (GPU)</option>
+                        <option value="memory" {{ old('type') == 'memory' ? 'selected' : '' }}>Memory (RAM)</option>
+                        <option value="storage" {{ old('type') == 'storage' ? 'selected' : '' }}>Storage (SSD/HDD)</option>
+                        <option value="power" {{ old('type') == 'power' ? 'selected' : '' }}>Power Supply (PSU)</option>
+                        <option value="cases" {{ old('type') == 'cases' ? 'selected' : '' }}>PC Case</option>
+                        <option value="cooling" {{ old('type') == 'cooling' ? 'selected' : '' }}>Cooling</option>
+                    </select>
+                    @error('type')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-sm text-gray-500">Select a component type if this product should appear in the PC Builder</p>
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 font-semibold mb-2">Product Image</label>

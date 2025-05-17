@@ -135,10 +135,19 @@ class BuildController extends Controller
     
     private function getComponentsByType($type)
     {
+        // Log the type we're looking for
+        Log::debug("Fetching components of type: " . $type);
         
+        // Specifically check for products where the 'type' column equals the requested type
         $components = Product::where('type', $type)->get();
         
+        // If debug is enabled, dump the query to see what's happening
+        Log::debug("Query executed: " . Product::where('type', $type)->toSql());
         
+        // Log how many components we found
+        Log::debug("Found " . $components->count() . " components with type: " . $type);
+        
+        // If no components found with the exact type, try to find them by category name
         if ($components->isEmpty()) {
             // Map of type to possible category names
             $categoryMap = [
@@ -152,20 +161,34 @@ class BuildController extends Controller
                 'cooling' => ['Cooling', 'CPU Coolers', 'PC Parts']
             ];
             
-        
             $possibleCategories = $categoryMap[$type] ?? ['PC Parts'];
-            
+            Log::debug("Looking by categories: " . implode(", ", $possibleCategories));
             
             $categoryIds = Category::whereIn('name', $possibleCategories)->pluck('id')->toArray();
+            Log::debug("Found category IDs: " . implode(", ", $categoryIds));
             
             if (!empty($categoryIds)) {
-                $components = Product::whereIn('category_id', $categoryIds)->get();
+                // Only get components from this category that don't already have a type set
+                // This prevents overlapping results
+                $components = Product::whereIn('category_id', $categoryIds)
+                                    ->where(function($query) {
+                                        $query->whereNull('type')
+                                            ->orWhere('type', '');
+                                    })
+                                    ->get();
+                Log::debug("Found " . $components->count() . " components by category");
             }
         }
         
-        
+        // If still no components, return demo data
         if ($components->isEmpty()) {
+            Log::debug("No components found, returning demo data");
             return $this->getDemoComponents($type);
+        }
+        
+        // Debug log the component list
+        foreach($components as $component) {
+            Log::debug("Component: {$component->id} - {$component->name} - Type: {$component->type}");
         }
         
         return $components;

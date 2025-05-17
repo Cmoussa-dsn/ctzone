@@ -25,6 +25,20 @@
                     <h2 class="text-lg font-semibold text-gray-700">Filter Products</h2>
                 </div>
                 <div class="flex flex-wrap gap-4">
+                    <div class="relative w-full md:w-64">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            placeholder="Search components (e.g. i5 13400F)" 
+                            value="{{ request()->get('search', '') }}"
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full pr-10"
+                        >
+                        <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-indigo-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
                     <select id="category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="all">All Categories</option>
                         <option value="prebuilt">Pre-built PCs</option>
@@ -50,7 +64,19 @@
 
     <!-- Pre-built PCs Section -->
     <div id="prebuilt" class="container mx-auto px-6 py-16 section-container" data-category="prebuilt">
-        <h2 class="text-3xl font-bold mb-10 text-center">Pre-built PCs</h2>
+        <h2 class="text-3xl font-bold mb-4 text-center">Pre-built PCs</h2>
+        
+        @if(request()->has('search') && request()->get('search'))
+        <div class="mb-6 text-center">
+            <p class="text-gray-600">Showing results for: <span class="font-semibold text-indigo-600">{{ request()->get('search') }}</span></p>
+            <a href="{{ route('buy') }}" class="text-indigo-500 hover:text-indigo-700 text-sm inline-flex items-center mt-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Clear search
+            </a>
+        </div>
+        @endif
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse ($preBuiltPCs as $product)
@@ -130,7 +156,19 @@
     
     <!-- Components Section -->
     <div id="components" class="container mx-auto px-6 py-16 bg-gray-50 section-container" data-category="components">
-        <h2 class="text-3xl font-bold mb-10 text-center">PC Components</h2>
+        <h2 class="text-3xl font-bold mb-4 text-center">PC Components</h2>
+        
+        @if(request()->has('search') && request()->get('search'))
+        <div class="mb-6 text-center">
+            <p class="text-gray-600">Showing results for: <span class="font-semibold text-indigo-600">{{ request()->get('search') }}</span></p>
+            <a href="{{ route('buy') }}" class="text-indigo-500 hover:text-indigo-700 text-sm inline-flex items-center mt-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Clear search
+            </a>
+        </div>
+        @endif
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             @forelse ($components as $product)
@@ -214,6 +252,7 @@
             const categoryFilter = document.getElementById('category-filter');
             const sections = document.querySelectorAll('.section-container');
             const filterForm = document.getElementById('filter-form');
+            const searchInput = document.querySelector('input[name="search"]');
             
             // Set initial category based on URL parameter if present
             const urlParams = new URLSearchParams(window.location.search);
@@ -228,6 +267,16 @@
                         section.style.display = 'block';
                     } else {
                         section.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Add search button functionality
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        filterForm.submit();
                     }
                 });
             }

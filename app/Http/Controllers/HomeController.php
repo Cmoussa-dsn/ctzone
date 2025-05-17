@@ -34,6 +34,7 @@ class HomeController extends Controller
         $priceRange = $request->input('price_range');
         $sortBy = $request->input('sort_by', 'featured');
         $category = $request->input('category', 'all');
+        $search = $request->input('search');
         
         
         $categories = Category::all();
@@ -56,6 +57,19 @@ class HomeController extends Controller
                       ->orWhere('type', '!=', 'custom_pc');
             });
         
+        // Apply search filter if provided
+        if ($search) {
+            $searchTerm = '%' . $search . '%';
+            $preBuiltQuery->where(function($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm)
+                      ->orWhere('description', 'like', $searchTerm);
+            });
+            
+            $componentsQuery->where(function($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm)
+                      ->orWhere('description', 'like', $searchTerm);
+            });
+        }
         
         if ($priceRange) {
             $prices = explode('-', $priceRange);

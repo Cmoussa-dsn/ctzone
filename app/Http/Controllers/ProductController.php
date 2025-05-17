@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -41,17 +42,29 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'type' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        // Log the type value from the request
+        Log::debug('Product type in request: ' . ($request->type ?? 'null'));
+        
         $data = $request->except('image');
-
+        
+        // Ensure the type field isn't empty string (which is different from null)
+        if (isset($data['type']) && $data['type'] === '') {
+            $data['type'] = null;
+        }
+        
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
             $data['image'] = $imagePath;
         }
 
-        Product::create($data);
+        $product = Product::create($data);
+        
+        // Log the created product
+        Log::debug('Created product: ' . $product->id . ', Type: ' . ($product->type ?? 'null'));
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully');
@@ -84,10 +97,20 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'type' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        // Log the current product type and the requested type
+        Log::debug('Product update - ID: ' . $product->id);
+        Log::debug('Current type: ' . ($product->type ?? 'null') . ', Requested type: ' . ($request->type ?? 'null'));
+        
         $data = $request->except('image');
+        
+        // Ensure the type field isn't empty string (which is different from null)
+        if (isset($data['type']) && $data['type'] === '') {
+            $data['type'] = null;
+        }
 
         if ($request->hasFile('image')) {
            
@@ -100,6 +123,9 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+        
+        // Log the updated product type
+        Log::debug('Updated product type: ' . ($product->type ?? 'null'));
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully');

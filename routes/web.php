@@ -300,6 +300,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
+            'type' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -307,7 +308,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        \App\Models\Product::create($validated);
+        // Log the type value
+        \Illuminate\Support\Facades\Log::debug('Creating product with type: ' . ($request->type ?? 'null'));
+        
+        $product = \App\Models\Product::create($validated);
+        
+        // Log the created product
+        \Illuminate\Support\Facades\Log::debug('Created product ID: ' . $product->id . ', Type: ' . ($product->type ?? 'null'));
+
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully.');
     }
     return redirect('/')->with('error', 'Unauthorized.');
@@ -331,8 +339,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
                 'price' => 'required|numeric|min:0',
                 'stock_quantity' => 'required|integer|min:0',
                 'category_id' => 'required|exists:categories,id',
+                'type' => 'nullable|string',
             ]);
+            
+            // Log the type value before update
+            \Illuminate\Support\Facades\Log::debug('Updating product ID: ' . $product->id);
+            \Illuminate\Support\Facades\Log::debug('Current type: ' . ($product->type ?? 'null') . ', New type: ' . ($request->type ?? 'null'));
+            
             $product->update($validated);
+            
+            // Log the type value after update
+            \Illuminate\Support\Facades\Log::debug('Updated product type: ' . ($product->type ?? 'null'));
+            
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
         }
         return redirect('/')->with('error', 'Unauthorized.');
@@ -600,6 +618,86 @@ Route::prefix('mining')->name('mining.')->group(function () {
         Route::get('/calculator', [MiningController::class, 'calculator'])->name('calculator');
         Route::post('/calculate', [MiningController::class, 'calculateProfitability'])->name('calculate');
     });
+});
+
+// Debug route to check products
+Route::get('/debug-products', function() {
+    $products = \App\Models\Product::all();
+    $byType = $products->groupBy('type');
+    
+    return response()->json([
+        'total_products' => $products->count(),
+        'products_by_type' => $byType->map(function($items, $type) {
+            return [
+                'type' => $type ?: '(empty)',
+                'count' => $items->count(),
+                'items' => $items->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'type' => $item->type
+                    ];
+                })
+            ];
+        })
+    ]);
+});
+
+// Debug route for specific product by ID
+Route::get('/debug-product/{id}', function($id) {
+    $product = \App\Models\Product::findOrFail($id);
+    return response()->json([
+        'id' => $product->id,
+        'name' => $product->name,
+        'type' => $product->type ?? '(null)',
+        'raw_type_value' => var_export($product->type, true),
+        'category_id' => $product->category_id,
+        'category_name' => $product->category ? $product->category->name : null
+    ]);
+});
+
+// One-time fix for product types in PC components
+Route::get('/fix-component-types', function() {
+    $productTypeMappings = [
+        'processors' => ['processor', 'cpu', 'intel', 'amd', 'ryzen', 'core'],
+        'motherboards' => ['motherboard', 'mainboard', 'asus', 'msi', 'gigabyte', 'asrock'],
+        'graphics' => ['graphics', 'gpu', 'nvidia', 'geforce', 'rtx', 'radeon', 'amd'],
+        'memory' => ['memory', 'ram', 'ddr4', 'ddr5', 'corsair', 'kingston', 'crucial'],
+        'storage' => ['storage', 'ssd', 'hdd', 'nvme', 'samsung', 'western digital', 'seagate'],
+        'power' => ['power', 'psu', 'supply', 'corsair', 'evga', 'seasonic'],
+        'cases' => ['case', 'chassis', 'tower', 'nzxt', 'corsair', 'fractal'],
+        'cooling' => ['cooling', 'cooler', 'fan', 'noctua', 'corsair', 'cooler master']
+    ];
+
+    $updated = [];
+    $products = \App\Models\Product::all();
+    
+    foreach ($products as $product) {
+        $name = strtolower($product->name);
+        $matched = false;
+        
+        foreach ($productTypeMappings as $type => $keywords) {
+            foreach ($keywords as $keyword) {
+                if (strpos($name, $keyword) !== false) {
+                    $product->type = $type;
+                    $product->save();
+                    $updated[] = "Updated {$product->id}: {$product->name} to type: {$type}";
+                    $matched = true;
+                    break 2;
+                }
+            }
+        }
+        
+        if (!$matched && !empty($product->type)) {
+            $updated[] = "Kept {$product->id}: {$product->name} with existing type: {$product->type}";
+        }
+    }
+    
+    return response()->json([
+        'message' => 'Product types update complete',
+        'updated' => $updated,
+        'count' => count($updated)
+    ]);
 });
 
 require __DIR__.'/auth.php';

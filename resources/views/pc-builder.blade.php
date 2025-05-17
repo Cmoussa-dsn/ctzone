@@ -23,27 +23,6 @@
                 <p class="text-gray-600 max-w-2xl mx-auto">Select your components below to build your custom PC. We'll assemble it, test it, and ship it to your doorstep.</p>
             </div>
             
-            <!-- Component Category Filter -->
-            <div class="mb-8 max-w-4xl mx-auto">
-                <div class="flex flex-wrap items-center justify-between bg-white p-4 rounded-lg shadow">
-                    <div class="w-full md:w-auto mb-4 md:mb-0">
-                        <h3 class="font-semibold text-gray-700">Filter Components</h3>
-                    </div>
-                    <div class="w-full md:w-auto">
-                        <select id="component-category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="all">All Components</option>
-                            <option value="processor">Processors</option>
-                            <option value="motherboard">Motherboards</option>
-                            <option value="graphics">Graphics Cards</option>
-                            <option value="memory">Memory</option>
-                            <option value="storage">Storage</option>
-                            <option value="power">Power Supplies</option>
-                            <option value="case">Cases</option>
-                            <option value="cooling">Cooling</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
             
             <form action="{{ route('pc-builder.store') }}" method="POST" class="max-w-4xl mx-auto">
                 @csrf
