@@ -18,6 +18,12 @@
                     <x-nav-link :href="route('mining.index')" :active="request()->routeIs('mining.*')">
                         {{ __('Mining') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                        {{ __('Profile') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('profile.custom-builds')" :active="request()->routeIs('profile.custom-builds')">
+                        {{ __('Custom Builds') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +81,12 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('mining.index')" :active="request()->routeIs('mining.*')">
                 {{ __('Mining') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                {{ __('Profile') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('profile.custom-builds')" :active="request()->routeIs('profile.custom-builds')">
+                {{ __('Custom Builds') }}
             </x-responsive-nav-link>
         </div>
 

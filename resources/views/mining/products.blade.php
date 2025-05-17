@@ -11,26 +11,40 @@
     <div class="container mx-auto px-6 py-12">
         <!-- Filter/Sort Controls -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
+            <form id="filter-form" action="{{ route('mining.products') }}" method="GET" class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
                     <h2 class="text-lg font-medium mb-2">Filters</h2>
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="filterProducts('all')" class="filter-btn active px-4 py-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg text-indigo-800 transition duration-300" data-filter="all">All</button>
-                        <button type="button" onclick="filterProducts('ASIC')" class="filter-btn px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 transition duration-300" data-filter="ASIC">ASIC Miners</button>
-                        <button type="button" onclick="filterProducts('GPU')" class="filter-btn px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 transition duration-300" data-filter="GPU">GPU Miners</button>
-                        <button type="button" onclick="filterProducts('accessories')" class="filter-btn px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 transition duration-300" data-filter="accessories">Accessories</button>
+                        <input type="hidden" name="filter_type" id="filter-type-input" value="{{ $filterType ?? 'all' }}">
+                        <button type="button" onclick="updateFilter('all')" class="filter-btn {{ (isset($filterType) && $filterType == 'all') || !isset($filterType) ? 'active bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800' }} px-4 py-2 hover:bg-indigo-200 rounded-lg transition duration-300" data-filter="all">All</button>
+                        <button type="button" onclick="updateFilter('ASIC')" class="filter-btn {{ isset($filterType) && $filterType == 'ASIC' ? 'active bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800' }} px-4 py-2 hover:bg-indigo-200 rounded-lg transition duration-300" data-filter="ASIC">ASIC Miners</button>
+                        <button type="button" onclick="updateFilter('GPU')" class="filter-btn {{ isset($filterType) && $filterType == 'GPU' ? 'active bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800' }} px-4 py-2 hover:bg-indigo-200 rounded-lg transition duration-300" data-filter="GPU">GPU Miners</button>
+                        <button type="button" onclick="updateFilter('accessories')" class="filter-btn {{ isset($filterType) && $filterType == 'accessories' ? 'active bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800' }} px-4 py-2 hover:bg-indigo-200 rounded-lg transition duration-300" data-filter="accessories">Accessories</button>
                     </div>
                 </div>
-                <div>
-                    <h2 class="text-lg font-medium mb-2">Sort By</h2>
-                    <select class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Newest First</option>
-                        <option>Hashrate: High to Low</option>
-                    </select>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div>
+                        <label for="price-range" class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                        <select id="price-range" name="price_range" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="this.form.submit()">
+                            <option value="">All Prices</option>
+                            <option value="0-500" {{ isset($priceRange) && $priceRange == '0-500' ? 'selected' : '' }}>Under $500</option>
+                            <option value="500-1000" {{ isset($priceRange) && $priceRange == '500-1000' ? 'selected' : '' }}>$500 - $1000</option>
+                            <option value="1000-3000" {{ isset($priceRange) && $priceRange == '1000-3000' ? 'selected' : '' }}>$1000 - $3000</option>
+                            <option value="3000-0" {{ isset($priceRange) && $priceRange == '3000-0' ? 'selected' : '' }}>$3000+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sort-by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                        <select id="sort-by" name="sort_by" class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="this.form.submit()">
+                            <option value="featured" {{ (isset($sortBy) && $sortBy == 'featured') || !isset($sortBy) ? 'selected' : '' }}>Featured</option>
+                            <option value="price-low" {{ isset($sortBy) && $sortBy == 'price-low' ? 'selected' : '' }}>Price: Low to High</option>
+                            <option value="price-high" {{ isset($sortBy) && $sortBy == 'price-high' ? 'selected' : '' }}>Price: High to Low</option>
+                            <option value="newest" {{ isset($sortBy) && $sortBy == 'newest' ? 'selected' : '' }}>Newest First</option>
+                            <option value="hashrate-high" {{ isset($sortBy) && $sortBy == 'hashrate-high' ? 'selected' : '' }}>Hashrate: High to Low</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
 
         <!-- Products Grid -->
@@ -174,8 +188,11 @@
 
     <!-- JavaScript for filtering products -->
     <script>
-        // Filter products by type
-        function filterProducts(filterType) {
+        // Update filter and submit form
+        function updateFilter(filterType) {
+            // Update hidden input
+            document.getElementById('filter-type-input').value = filterType;
+            
             // Update active filter button
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 if (btn.dataset.filter === filterType) {
@@ -187,6 +204,12 @@
                 }
             });
             
+            // Submit the form
+            document.getElementById('filter-form').submit();
+        }
+        
+        // Legacy function for client-side filtering (if needed for immediate UI updates)
+        function filterProductsUI(filterType) {
             // Show/hide products based on filter
             document.querySelectorAll('.product-card').forEach(card => {
                 if (filterType === 'all' || card.dataset.type === filterType) {
@@ -196,11 +219,5 @@
                 }
             });
         }
-        
-        // Function to initialize filtering
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set "All" as active by default
-            filterProducts('all');
-        });
     </script>
 </x-app-layout>

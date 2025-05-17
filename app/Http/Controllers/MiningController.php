@@ -49,13 +49,79 @@ class MiningController extends Controller
     /**
      * Display all mining products.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
      */
-    public function products(): View
+    public function products(Request $request): View
     {
-        $miningProducts = MiningProduct::paginate(12);
+        // Get filter parameters
+        $priceRange = $request->input('price_range');
+        $sortBy = $request->input('sort_by', 'featured');
+        $filterType = $request->input('filter_type', 'all');
         
-        return view('mining.products', compact('miningProducts'));
+        // Initialize base query
+        $query = MiningProduct::query();
+        
+        // Apply filter by type
+        if ($filterType !== 'all') {
+            switch ($filterType) {
+                case 'ASIC':
+                    $query->where('algorithm', 'like', '%SHA-256%');
+                    break;
+                case 'GPU':
+                    $query->where('algorithm', '!=', 'N/A')
+                          ->where('algorithm', 'not like', '%SHA-256%');
+                    break;
+                case 'accessories':
+                    $query->where('algorithm', 'N/A');
+                    break;
+            }
+        }
+        
+        // Apply price range filter
+        if ($priceRange) {
+            $prices = explode('-', $priceRange);
+            if (count($prices) == 2) {
+                $minPrice = (float) $prices[0];
+                $maxPrice = (float) $prices[1];
+                
+                // If maxPrice is 0, it means no upper limit (e.g., "2000+")
+                if ($maxPrice > 0) {
+                    $query->whereBetween('price', [$minPrice, $maxPrice]);
+                } else {
+                    $query->where('price', '>=', $minPrice);
+                }
+            }
+        }
+        
+        // Apply sorting
+        switch ($sortBy) {
+            case 'price-low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price-high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'newest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'hashrate-high':
+                // Special case for hashrate sorting
+                // First, sort by products with numeric hashrate in descending order
+                // For accessories with N/A hashrate, put them at the end
+                $query->orderByRaw("CASE WHEN hashrate = 'N/A' THEN 1 ELSE 0 END")
+                      ->orderBy('price', 'desc'); // Fallback for accessories with N/A hashrate
+                break;
+            case 'featured':
+            default:
+                $query->where('featured', true)->orderBy('price', 'desc')
+                      ->orWhere('featured', false);
+                break;
+        }
+        
+        $miningProducts = $query->paginate(12)->withQueryString();
+        
+        return view('mining.products', compact('miningProducts', 'priceRange', 'sortBy', 'filterType'));
     }
     
     /**

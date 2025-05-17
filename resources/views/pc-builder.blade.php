@@ -23,6 +23,28 @@
                 <p class="text-gray-600 max-w-2xl mx-auto">Select your components below to build your custom PC. We'll assemble it, test it, and ship it to your doorstep.</p>
             </div>
             
+            <!-- Component Category Filter -->
+            <div class="mb-8 max-w-4xl mx-auto">
+                <div class="flex flex-wrap items-center justify-between bg-white p-4 rounded-lg shadow">
+                    <div class="w-full md:w-auto mb-4 md:mb-0">
+                        <h3 class="font-semibold text-gray-700">Filter Components</h3>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <select id="component-category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all">All Components</option>
+                            <option value="processor">Processors</option>
+                            <option value="motherboard">Motherboards</option>
+                            <option value="graphics">Graphics Cards</option>
+                            <option value="memory">Memory</option>
+                            <option value="storage">Storage</option>
+                            <option value="power">Power Supplies</option>
+                            <option value="case">Cases</option>
+                            <option value="cooling">Cooling</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
             <form action="{{ route('pc-builder.store') }}" method="POST" class="max-w-4xl mx-auto">
                 @csrf
                 
@@ -30,7 +52,7 @@
                     <!-- Component Selection Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                         <!-- Processor -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="processor">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-microchip text-indigo-600 mr-2"></i>
                                 Processor (CPU)
@@ -46,7 +68,7 @@
                         </div>
                         
                         <!-- Motherboard -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="motherboard">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-server text-indigo-600 mr-2"></i>
                                 Motherboard
@@ -62,7 +84,7 @@
                         </div>
                         
                         <!-- Graphics Card -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="graphics">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-tv text-indigo-600 mr-2"></i>
                                 Graphics Card
@@ -78,7 +100,7 @@
                         </div>
                         
                         <!-- Memory -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="memory">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-memory text-indigo-600 mr-2"></i>
                                 Memory (RAM)
@@ -94,7 +116,7 @@
                         </div>
                         
                         <!-- Storage -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="storage">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-hdd text-indigo-600 mr-2"></i>
                                 Storage
@@ -110,7 +132,7 @@
                         </div>
                         
                         <!-- Power Supply -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="power">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-bolt text-indigo-600 mr-2"></i>
                                 Power Supply
@@ -126,7 +148,7 @@
                         </div>
                         
                         <!-- Case -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="case">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-desktop text-indigo-600 mr-2"></i>
                                 Case
@@ -142,7 +164,7 @@
                         </div>
                         
                         <!-- Cooling -->
-                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300">
+                        <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition duration-300 component-container" data-component-type="cooling">
                             <h3 class="text-lg font-medium mb-3 flex items-center">
                                 <i class="fas fa-wind text-indigo-600 mr-2"></i>
                                 Cooling
@@ -246,6 +268,27 @@
             components.forEach(component => {
                 component.addEventListener('change', updateTotalPrice);
             });
+            
+            // Component filtering functionality
+            const categoryFilter = document.getElementById('component-category-filter');
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', function() {
+                    const selectedCategory = this.value;
+                    
+                    // Get all component containers
+                    const componentContainers = document.querySelectorAll('.component-container');
+                    
+                    componentContainers.forEach(container => {
+                        const componentType = container.dataset.componentType;
+                        
+                        if (selectedCategory === 'all' || componentType === selectedCategory) {
+                            container.style.display = 'block';
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    });
+                });
+            }
         });
     </script>
     @endpush

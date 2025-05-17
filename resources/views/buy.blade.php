@@ -20,7 +20,7 @@
     <!-- Filter Section -->
     <div class="bg-gray-100 py-6">
         <div class="container mx-auto px-6">
-            <div class="flex flex-wrap items-center justify-between">
+            <form id="filter-form" action="{{ route('buy') }}" method="GET" class="flex flex-wrap items-center justify-between">
                 <div class="w-full md:w-auto mb-4 md:mb-0">
                     <h2 class="text-lg font-semibold text-gray-700">Filter Products</h2>
                 </div>
@@ -30,21 +30,21 @@
                         <option value="prebuilt">Pre-built PCs</option>
                         <option value="components">Components</option>
                     </select>
-                    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <select name="price_range" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="this.form.submit()">
                         <option value="">Price Range</option>
-                        <option value="0-500">Under $500</option>
-                        <option value="500-1000">$500 - $1000</option>
-                        <option value="1000-2000">$1000 - $2000</option>
-                        <option value="2000+">$2000+</option>
+                        <option value="0-500" {{ isset($priceRange) && $priceRange == '0-500' ? 'selected' : '' }}>Under $500</option>
+                        <option value="500-1000" {{ isset($priceRange) && $priceRange == '500-1000' ? 'selected' : '' }}>$500 - $1000</option>
+                        <option value="1000-2000" {{ isset($priceRange) && $priceRange == '1000-2000' ? 'selected' : '' }}>$1000 - $2000</option>
+                        <option value="2000-0" {{ isset($priceRange) && $priceRange == '2000-0' ? 'selected' : '' }}>$2000+</option>
                     </select>
-                    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="featured">Featured</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                        <option value="newest">Newest</option>
+                    <select name="sort_by" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="this.form.submit()">
+                        <option value="featured" {{ (isset($sortBy) && $sortBy == 'featured') || !isset($sortBy) ? 'selected' : '' }}>Featured</option>
+                        <option value="price-low" {{ isset($sortBy) && $sortBy == 'price-low' ? 'selected' : '' }}>Price: Low to High</option>
+                        <option value="price-high" {{ isset($sortBy) && $sortBy == 'price-high' ? 'selected' : '' }}>Price: High to Low</option>
+                        <option value="newest" {{ isset($sortBy) && $sortBy == 'newest' ? 'selected' : '' }}>Newest</option>
                     </select>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -213,10 +213,39 @@
         document.addEventListener('DOMContentLoaded', function() {
             const categoryFilter = document.getElementById('category-filter');
             const sections = document.querySelectorAll('.section-container');
+            const filterForm = document.getElementById('filter-form');
+            
+            // Set initial category based on URL parameter if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            
+            if (categoryParam) {
+                categoryFilter.value = categoryParam;
+                
+                // Apply initial visibility
+                sections.forEach(section => {
+                    if (categoryParam === 'all' || section.dataset.category === categoryParam) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
             
             categoryFilter.addEventListener('change', function() {
                 const selectedValue = this.value;
                 
+                // Create hidden input for the category
+                let categoryInput = filterForm.querySelector('input[name="category"]');
+                if (!categoryInput) {
+                    categoryInput = document.createElement('input');
+                    categoryInput.type = 'hidden';
+                    categoryInput.name = 'category';
+                    filterForm.appendChild(categoryInput);
+                }
+                categoryInput.value = selectedValue;
+                
+                // Update UI immediately for better UX
                 sections.forEach(section => {
                     if (selectedValue === 'all' || section.dataset.category === selectedValue) {
                         section.style.display = 'block';
@@ -232,6 +261,9 @@
                         targetSection.scrollIntoView({ behavior: 'smooth' });
                     }
                 }
+                
+                // Submit the form to apply filters
+                filterForm.submit();
             });
         });
         
