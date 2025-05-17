@@ -19,14 +19,27 @@
                             @foreach($cartItems as $item)
                                 <div class="flex flex-col sm:flex-row py-4 items-center">
                                     <div class="w-full sm:w-24 h-24 mb-4 sm:mb-0">
-                                        <img src="{{ $item->product->image ? asset('storage/' . $item->product->image) : asset('images/default-pc.jpg') }}" 
-                                            alt="{{ $item->product->name }}" 
-                                            class="w-full h-full object-cover rounded">
+                                        @if($item->product->type == 'custom_pc')
+                                            <img src="{{ asset('images/default-pc.jpg') }}" 
+                                                alt="{{ $item->product->name }}" 
+                                                class="w-full h-full object-cover rounded">
+                                        @else
+                                            <img src="{{ $item->product->image ? asset('storage/' . $item->product->image) : asset('images/default-pc.jpg') }}" 
+                                                alt="{{ $item->product->name }}" 
+                                                class="w-full h-full object-cover rounded">
+                                        @endif
                                     </div>
                                     
                                     <div class="flex-1 px-4">
                                         <h3 class="font-semibold text-lg">{{ $item->product->name }}</h3>
                                         <p class="text-gray-600 text-sm">{{ Str::limit($item->product->description, 60) }}</p>
+                                        
+                                        @if($item->product->type == 'custom_pc' && session()->has('custom_pc'))
+                                            <div class="mt-2 text-xs text-gray-500">
+                                                <p>Custom PC with selected components</p>
+                                            </div>
+                                        @endif
+                                        
                                         <p class="text-indigo-600 font-semibold mt-1">${{ number_format($item->product->price, 2) }}</p>
                                     </div>
                                     

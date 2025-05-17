@@ -33,6 +33,159 @@ Route::get('/test-component', function() {
     return view('test-component');
 });
 
+// Temporary route to check PC components
+Route::get('/check-components/{type?}', function($type = null) {
+    if ($type) {
+        $components = \App\Models\Product::where('type', $type)->get();
+        return response()->json([
+            'count' => $components->count(),
+            'components' => $components
+        ]);
+    }
+    
+    $types = ['processors', 'motherboards', 'graphics', 'memory', 'storage', 'power', 'cases', 'cooling'];
+    $result = [];
+    
+    foreach ($types as $componentType) {
+        $count = \App\Models\Product::where('type', $componentType)->count();
+        $result[$componentType] = $count;
+    }
+    
+    return response()->json($result);
+});
+
+// Add missing component categories route
+Route::get('/setup-component-categories', function() {
+    // Define all component categories needed for the PC builder
+    $categories = [
+        ['name' => 'Processors'],
+        ['name' => 'Motherboards'],
+        ['name' => 'Graphics Cards'],
+        ['name' => 'Memory'],
+        ['name' => 'Storage'],
+        ['name' => 'Power Supplies'],
+        ['name' => 'Cases'],
+        ['name' => 'Cooling']
+    ];
+    
+    $results = [];
+    
+    // Create categories only if they don't already exist
+    foreach ($categories as $category) {
+        $exists = \App\Models\Category::where('name', $category['name'])->exists();
+        
+        if (!$exists) {
+            \App\Models\Category::create($category);
+            $results[] = "Added category: " . $category['name'];
+        } else {
+            $results[] = "Category already exists: " . $category['name'];
+        }
+    }
+    
+    return response()->json([
+        'message' => 'Component categories setup complete',
+        'results' => $results
+    ]);
+});
+
+// Set product types for existing products
+Route::get('/setup-product-types', function() {
+    $typeMap = [
+        'processors' => ['processor', 'CPU', 'Core', 'Ryzen', 'Intel', 'AMD'],
+        'motherboards' => ['motherboard', 'ROG', 'MSI', 'ASUS', 'B550', 'Z690'],
+        'graphics' => ['graphic', 'GPU', 'RTX', 'Radeon', 'GeForce', 'RX'],
+        'memory' => ['memory', 'RAM', 'DDR4', 'DDR5', 'Vengeance', 'Trident'],
+        'storage' => ['storage', 'SSD', 'HDD', 'NVMe', 'Samsung', 'Seagate', 'Barracuda', 'EVO'],
+        'power' => ['power', 'PSU', 'Supply', 'Watt', 'RM850', 'SuperNOVA'],
+        'cases' => ['case', 'Tower', 'H510', '4000D'],
+        'cooling' => ['cooling', 'Cooler', 'Liquid', 'Air', 'H100i', 'NH-D15', 'Noctua', 'Fan']
+    ];
+    
+    $updated = [];
+    $products = \App\Models\Product::whereNull('type')->get();
+    
+    foreach ($products as $product) {
+        $foundType = null;
+        
+        // Check name against type keywords
+        foreach ($typeMap as $type => $keywords) {
+            foreach ($keywords as $keyword) {
+                if (stripos($product->name, $keyword) !== false) {
+                    $foundType = $type;
+                    break 2;
+                }
+            }
+        }
+        
+        if ($foundType) {
+            $product->type = $foundType;
+            $product->save();
+            $updated[] = "Updated: " . $product->name . " → " . $foundType;
+        }
+    }
+    
+    return response()->json([
+        'message' => 'Product types updated',
+        'updated' => $updated,
+        'count' => count($updated)
+    ]);
+});
+
+// Assign correct categories to products based on their type
+Route::get('/fix-product-categories', function() {
+    // Type to category name mapping
+    $categoryMap = [
+        'processors' => 'Processors',
+        'motherboards' => 'Motherboards',
+        'graphics' => 'Graphics Cards',
+        'memory' => 'Memory',
+        'storage' => 'Storage',
+        'power' => 'Power Supplies',
+        'cases' => 'Cases',
+        'cooling' => 'Cooling'
+    ];
+    
+    // Make sure categories exist first
+    foreach ($categoryMap as $categoryName) {
+        \App\Models\Category::firstOrCreate(['name' => $categoryName]);
+    }
+    
+    // Get category IDs
+    $categories = [];
+    foreach ($categoryMap as $type => $categoryName) {
+        $category = \App\Models\Category::where('name', $categoryName)->first();
+        if ($category) {
+            $categories[$type] = $category->id;
+        }
+    }
+    
+    $updated = [];
+    $products = \App\Models\Product::whereNotNull('type')->get();
+    
+    foreach ($products as $product) {
+        $type = $product->type;
+        
+        if (isset($categories[$type])) {
+            $oldCategoryId = $product->category_id;
+            $product->category_id = $categories[$type];
+            $product->save();
+            
+            $oldCategory = \App\Models\Category::find($oldCategoryId);
+            $newCategory = \App\Models\Category::find($categories[$type]);
+            
+            $updated[] = "Updated: " . $product->name . " → Category: " . 
+                ($oldCategory ? $oldCategory->name : 'Unknown') . " to " . 
+                ($newCategory ? $newCategory->name : 'Unknown');
+        }
+    }
+    
+    return response()->json([
+        'message' => 'Product categories updated',
+        'updated' => $updated,
+        'count' => count($updated)
+    ]);
+});
+
 // Dashboard (default Laravel)
 Route::get('/dashboard', function () {
     return view('dashboard');

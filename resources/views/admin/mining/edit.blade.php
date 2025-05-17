@@ -4,6 +4,23 @@
     <div class="max-w-xl mx-auto">
         <div class="glass p-8 rounded-2xl shadow-lg">
             <h1 class="text-2xl font-bold text-blue-700 mb-6">Edit Mining Product</h1>
+            
+            <!-- Product Type Selection for easier form filling -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Product Type</label>
+                <div class="flex space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="product_type_selector" value="miner" class="form-radio text-blue-600" {{ $miningProduct->algorithm !== 'N/A' ? 'checked' : '' }}>
+                        <span class="ml-2">Mining Device</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="product_type_selector" value="accessory" class="form-radio text-blue-600" {{ $miningProduct->algorithm === 'N/A' ? 'checked' : '' }}>
+                        <span class="ml-2">Accessory</span>
+                    </label>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Select "Accessory" for mining frames, PSUs, cooling systems, etc.</p>
+            </div>
+            
             <form action="{{ route('admin.mining.update', $miningProduct->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-4">
@@ -38,7 +55,7 @@
                 <!-- Mining specific fields -->
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Algorithm</label>
-                    <select name="algorithm" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
+                    <select name="algorithm" id="algorithm" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
                         <option value="">Select an algorithm</option>
                         @foreach($algorithms as $value => $label)
                             <option value="{{ $value }}" {{ old('algorithm', $miningProduct->algorithm) == $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -50,8 +67,9 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Hashrate (with unit, e.g. "100 TH/s")</label>
-                    <input type="text" name="hashrate" value="{{ old('hashrate', $miningProduct->hashrate) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
+                    <label class="block text-gray-700 font-semibold mb-2">Hashrate (with unit, e.g. "100 TH/s" or "N/A" for accessories)</label>
+                    <input type="text" name="hashrate" id="hashrate" value="{{ old('hashrate', $miningProduct->hashrate) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
+                    <p class="text-sm text-gray-500 mt-1">For accessories, use "N/A"</p>
                     @error('hashrate')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -59,15 +77,17 @@
                 
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Power Consumption (watts)</label>
-                    <input type="number" name="power_consumption" value="{{ old('power_consumption', $miningProduct->power_consumption) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
+                    <input type="number" name="power_consumption" id="power_consumption" value="{{ old('power_consumption', $miningProduct->power_consumption) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500" required>
+                    <p class="text-sm text-gray-500 mt-1">For accessories with no power usage, enter 0</p>
                     @error('power_consumption')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-4" id="profit_estimate_field">
                     <label class="block text-gray-700 font-semibold mb-2">Daily Profit Estimate (USD)</label>
-                    <input type="number" step="0.01" name="daily_profit_estimate" value="{{ old('daily_profit_estimate', $miningProduct->daily_profit_estimate) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    <input type="number" step="0.01" name="daily_profit_estimate" id="daily_profit_estimate" value="{{ old('daily_profit_estimate', $miningProduct->daily_profit_estimate) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Leave at 0 for accessories</p>
                     @error('daily_profit_estimate')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -86,22 +106,77 @@
                 <div class="mb-6">
                     <label class="block text-gray-700 font-semibold mb-2">Product Image</label>
                     @if($miningProduct->image)
-                        <div class="mb-2">
-                            <img src="{{ asset('storage/' . $miningProduct->image) }}" alt="{{ $miningProduct->name }}" class="h-32 object-cover rounded">
+                        <div class="mb-3">
+                            <p class="text-sm text-gray-500 mb-2">Current image:</p>
+                            <img src="{{ asset('storage/' . $miningProduct->image) }}" alt="{{ $miningProduct->name }}" class="h-40 object-contain rounded-lg border border-gray-300">
                         </div>
                     @endif
                     <input type="file" name="image" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                    <p class="mt-1 text-sm text-gray-500">Leave empty to keep the current image</p>
+                    <p class="text-sm text-gray-500 mt-1">Leave empty to keep current image</p>
                     @error('image')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
                 <div class="flex justify-between items-center">
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Update Product</button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Save Changes</button>
                     <a href="{{ route('admin.mining.index') }}" class="text-gray-500 hover:text-gray-700">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productTypeSelector = document.querySelectorAll('input[name="product_type_selector"]');
+            const algorithmField = document.getElementById('algorithm');
+            const hashrateField = document.getElementById('hashrate');
+            const powerConsumptionField = document.getElementById('power_consumption');
+            const profitEstimateField = document.getElementById('daily_profit_estimate');
+            
+            // Function to set values for accessories
+            function setupForAccessory() {
+                // Set algorithm to N/A
+                for (let i = 0; i < algorithmField.options.length; i++) {
+                    if (algorithmField.options[i].value === 'N/A') {
+                        algorithmField.selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                // Set hashrate to N/A if it's not already
+                if (hashrateField.value !== 'N/A') {
+                    hashrateField.value = 'N/A';
+                }
+                
+                // Set profit estimate to 0
+                profitEstimateField.value = '0';
+                
+                // Hide profit estimate field (it will still be submitted)
+                document.getElementById('profit_estimate_field').style.display = 'none';
+            }
+            
+            // Function to reset fields for mining devices
+            function setupForMiner() {
+                // Show profit estimate field
+                document.getElementById('profit_estimate_field').style.display = 'block';
+            }
+            
+            // Add event listeners to radio buttons
+            productTypeSelector.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'accessory') {
+                        setupForAccessory();
+                    } else {
+                        setupForMiner();
+                    }
+                });
+            });
+            
+            // Initialize based on current data
+            if ('{{ $miningProduct->algorithm }}' === 'N/A') {
+                document.getElementById('profit_estimate_field').style.display = 'none';
+            }
+        });
+    </script>
 @endsection 

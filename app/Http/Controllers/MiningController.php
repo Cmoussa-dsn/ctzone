@@ -31,7 +31,10 @@ class MiningController extends Controller
             ->take(3)
             ->get();
             
-        $accessories = MiningProduct::whereIn('name', ['Mining Rig Frame', 'Bitmain Power Supply APW9+', 'Immersion Cooling Kit'])
+        // Get accessories - either from products explicitly named as accessories
+        // or products with N/A algorithm which indicates they're not miners
+        $accessories = MiningProduct::where('algorithm', 'N/A')
+            ->orWhereIn('name', ['Mining Rig Frame', 'Bitmain Power Supply APW9+', 'Immersion Cooling Kit'])
             ->take(3)
             ->get();
             
@@ -64,14 +67,24 @@ class MiningController extends Controller
     public function show($id): View
     {
         $product = MiningProduct::findOrFail($id);
-        $relatedProducts = MiningProduct::where('id', '!=', $id)
-            ->where(function($query) use ($product) {
-                $query->where('algorithm', $product->algorithm)
-                    ->orWhere('power_consumption', '<=', $product->power_consumption + 100)
-                    ->orWhere('power_consumption', '>=', $product->power_consumption - 100);
-            })
-            ->take(4)
-            ->get();
+        
+        // For products with N/A algorithm, show related accessories
+        // Otherwise, show related mining products
+        if ($product->algorithm === 'N/A') {
+            $relatedProducts = MiningProduct::where('id', '!=', $id)
+                ->where('algorithm', 'N/A')
+                ->take(4)
+                ->get();
+        } else {
+            $relatedProducts = MiningProduct::where('id', '!=', $id)
+                ->where(function($query) use ($product) {
+                    $query->where('algorithm', $product->algorithm)
+                        ->orWhere('power_consumption', '<=', $product->power_consumption + 100)
+                        ->orWhere('power_consumption', '>=', $product->power_consumption - 100);
+                })
+                ->take(4)
+                ->get();
+        }
             
         return view('mining.show', compact('product', 'relatedProducts'));
     }
@@ -151,7 +164,7 @@ class MiningController extends Controller
                 
                 // Real-world reference: 1 TH/s ≈ 0.000008 BTC per day
                 // Increased to 0.00005 BTC per day for better visibility in MH/s range
-                $dailyReward = $hashrateInTH * 0.00005;
+                $dailyReward = $hashrateInTH * 0.0000005;
                 break;
                 
             case 'Ethash':
@@ -162,7 +175,7 @@ class MiningController extends Controller
                 
                 // Real-world reference enhanced for better visibility
                 // 100 MH/s ≈ 0.003 ETH per day
-                $dailyReward = ($hashrateInMH / 100) * 0.003;
+                $dailyReward = ($hashrateInMH / 100) * 0.00003;
                 break;
                 
             case 'Scrypt':
@@ -173,7 +186,7 @@ class MiningController extends Controller
                 
                 // Real-world reference enhanced for better visibility
                 // 100 MH/s ≈ 0.03 LTC per day
-                $dailyReward = ($hashrateInMH / 100) * 0.03;
+                $dailyReward = ($hashrateInMH / 100) * 0.00003;
                 break;
                 
             case 'X11':
@@ -184,7 +197,7 @@ class MiningController extends Controller
                 
                 // Real-world reference enhanced for better visibility
                 // 1 GH/s ≈ 0.002 DASH per day
-                $dailyReward = $hashrateInGH * 0.002;
+                $dailyReward = $hashrateInGH * 0.000002;
                 break;
                 
             case 'RandomX':
@@ -195,13 +208,13 @@ class MiningController extends Controller
                 
                 // Real-world reference enhanced for better visibility
                 // 10000 H/s ≈ 0.008 XMR per day
-                $dailyReward = ($hashrateInH / 10000) * 0.008;
+                $dailyReward = ($hashrateInH / 10000) * 0.000008;
                 break;
                 
             default:
                 // Fallback
                 $cryptoSymbol = 'BTC';
-                $dailyReward = 0.00001;
+                $dailyReward = 0.00000001;
         }
         
         // Apply pool fee

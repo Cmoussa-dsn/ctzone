@@ -24,15 +24,31 @@ class HomeController extends Controller
     }
 
     /**
-     * Display the buy page with all PC products.
+     * Display the buy page with products separated into PCs and components.
      *
      * @return \Illuminate\Contracts\View\View
      */
     public function buy()
     {
-        $products = Product::with('category')->get();
+        // Get all categories
+        $categories = Category::all();
         
-        return view('buy', compact('products'));
+        // Find category IDs for PC categories (Gaming PCs and Office PCs)
+        $pcCategoryIds = $categories->whereIn('name', ['Gaming PCs', 'Office PCs'])->pluck('id')->toArray();
+        
+        // Separate products into PCs and components
+        $preBuiltPCs = Product::with('category')
+            ->whereIn('category_id', $pcCategoryIds)
+            ->get();
+            
+        $components = Product::with('category')
+            ->whereNotIn('category_id', $pcCategoryIds)
+            ->get();
+        
+        // Get all products for compatibility with existing code if needed
+        $allProducts = Product::with('category')->get();
+        
+        return view('buy', compact('preBuiltPCs', 'components', 'allProducts'));
     }
 
     // Build-related methods removed

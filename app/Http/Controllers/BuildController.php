@@ -18,16 +18,16 @@ class BuildController extends Controller
      */
     public function index()
     {
-        // Get demo components for PC building
+        // Get components for PC building from database
         $components = [
-            'processors' => $this->getDemoComponents('processors'),
-            'motherboards' => $this->getDemoComponents('motherboards'),
-            'graphics' => $this->getDemoComponents('graphics'),
-            'memory' => $this->getDemoComponents('memory'),
-            'storage' => $this->getDemoComponents('storage'),
-            'power' => $this->getDemoComponents('power'),
-            'cases' => $this->getDemoComponents('cases'),
-            'cooling' => $this->getDemoComponents('cooling'),
+            'processors' => $this->getComponentsByType('processors'),
+            'motherboards' => $this->getComponentsByType('motherboards'),
+            'graphics' => $this->getComponentsByType('graphics'),
+            'memory' => $this->getComponentsByType('memory'),
+            'storage' => $this->getComponentsByType('storage'),
+            'power' => $this->getComponentsByType('power'),
+            'cases' => $this->getComponentsByType('cases'),
+            'cooling' => $this->getComponentsByType('cooling'),
         ];
         
         return view('build.index', compact('components'));
@@ -38,16 +38,16 @@ class BuildController extends Controller
      */
     public function pcBuilder()
     {
-        // Get demo components for PC building
+        // Get components for PC building from database
         $components = [
-            'processors' => $this->getDemoComponents('processors'),
-            'motherboards' => $this->getDemoComponents('motherboards'),
-            'graphics' => $this->getDemoComponents('graphics'),
-            'memory' => $this->getDemoComponents('memory'),
-            'storage' => $this->getDemoComponents('storage'),
-            'power' => $this->getDemoComponents('power'),
-            'cases' => $this->getDemoComponents('cases'),
-            'cooling' => $this->getDemoComponents('cooling'),
+            'processors' => $this->getComponentsByType('processors'),
+            'motherboards' => $this->getComponentsByType('motherboards'),
+            'graphics' => $this->getComponentsByType('graphics'),
+            'memory' => $this->getComponentsByType('memory'),
+            'storage' => $this->getComponentsByType('storage'),
+            'power' => $this->getComponentsByType('power'),
+            'cases' => $this->getComponentsByType('cases'),
+            'cooling' => $this->getComponentsByType('cooling'),
         ];
         
         return view('pc-builder', compact('components'));
@@ -70,6 +70,39 @@ class BuildController extends Controller
             'total_price' => 'required|numeric'
         ]);
         
+        // First, we need to handle creating a virtual product for the custom PC build
+        // Get the processor component as the base product
+        $processorId = $request->processor;
+        $processor = null;
+        
+        // Try to find the processor component in the database
+        if (is_numeric($processorId)) {
+            $processor = Product::find($processorId);
+        }
+        
+        // If processor is not found or is a demo component, create a new product for the custom PC
+        if (!$processor) {
+            // Create a temporary product for the custom PC
+            $product = Product::create([
+                'name' => 'Custom PC Build',
+                'category_id' => 2, // Gaming PCs category
+                'description' => 'Custom built PC with selected components',
+                'price' => $request->total_price,
+                'stock_quantity' => 1,
+                'type' => 'custom_pc',
+            ]);
+        } else {
+            // Create a custom PC product based on the processor
+            $product = Product::create([
+                'name' => 'Custom PC with ' . $processor->name,
+                'category_id' => 2, // Gaming PCs category
+                'description' => 'Custom built PC with selected components including ' . $processor->name,
+                'price' => $request->total_price,
+                'stock_quantity' => 1,
+                'type' => 'custom_pc',
+            ]);
+        }
+        
         // Create a custom build ID
         $buildId = 'custom-' . time();
         
@@ -77,7 +110,8 @@ class BuildController extends Controller
         session([
             'custom_pc' => [
                 'id' => $buildId,
-                'name' => 'Custom PC Build',
+                'product_id' => $product->id,
+                'name' => $product->name,
                 'price' => $request->total_price,
                 'components' => [
                     'processor' => $request->processor,
@@ -92,12 +126,62 @@ class BuildController extends Controller
             ]
         ]);
         
+        // Add the custom PC to the cart
+        CartItem::create([
+            'user_id' => Auth::id(),
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ]);
+        
         return redirect()->route('cart.index')
             ->with('success', 'Custom PC has been added to your cart!');
     }
     
     /**
+     * Get components by type from the database
+     * Try to find by type first, then by category name
+     */
+    private function getComponentsByType($type)
+    {
+        // Try to find components by type field
+        $components = Product::where('type', $type)->get();
+        
+        // If no components found by type, try to find by category
+        if ($components->isEmpty()) {
+            // Map of type to possible category names
+            $categoryMap = [
+                'processors' => ['Processors', 'CPUs', 'PC Parts'],
+                'motherboards' => ['Motherboards', 'PC Parts'],
+                'graphics' => ['Graphics Cards', 'GPUs', 'PC Parts'],
+                'memory' => ['Memory', 'RAM', 'PC Parts'],
+                'storage' => ['Storage', 'SSDs', 'HDDs', 'PC Parts'],
+                'power' => ['Power Supplies', 'PSUs', 'PC Parts'],
+                'cases' => ['Cases', 'PC Cases', 'PC Parts'],
+                'cooling' => ['Cooling', 'CPU Coolers', 'PC Parts']
+            ];
+            
+            // Get categories that could match this component type
+            $possibleCategories = $categoryMap[$type] ?? ['PC Parts'];
+            
+            // Find category IDs
+            $categoryIds = Category::whereIn('name', $possibleCategories)->pluck('id')->toArray();
+            
+            if (!empty($categoryIds)) {
+                $components = Product::whereIn('category_id', $categoryIds)->get();
+            }
+        }
+        
+        // If still no components found, use demo components
+        if ($components->isEmpty()) {
+            return $this->getDemoComponents($type);
+        }
+        
+        return $components;
+    }
+    
+    /**
      * Get demo components when database is empty
+     * This serves as a fallback method
      */
     private function getDemoComponents($type)
     {

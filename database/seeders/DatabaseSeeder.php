@@ -119,9 +119,10 @@ class DatabaseSeeder extends Seeder
             Product::create($product);
         }
 
-        // Comment out the MiningProductSeeder call since we're handling it separately
-        // $this->call([
-        //     MiningProductSeeder::class,
-        // ]);
+        // Run component-related seeders
+        $this->call([
+            ComponentCategoriesSeeder::class,
+            PcComponentsSeeder::class,
+        ]);
     }
-}
+} 

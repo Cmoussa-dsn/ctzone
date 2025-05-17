@@ -25,7 +25,8 @@ class AdminMiningProductController extends Controller
                 'Ethash' => 'Ethash (Ethereum Classic)',
                 'Scrypt' => 'Scrypt (Litecoin)',
                 'X11' => 'X11 (Dash)',
-                'RandomX' => 'RandomX (Monero)'
+                'RandomX' => 'RandomX (Monero)',
+                'N/A' => 'N/A (Accessories, Frames, PSUs, etc.)'
             ];
             return view('admin.mining.create', compact('algorithms'));
         }
@@ -50,6 +51,11 @@ class AdminMiningProductController extends Controller
 
             // Set featured to false if not present
             $validated['featured'] = $request->has('featured') ? true : false;
+            
+            // For accessories (N/A algorithm), set daily profit to 0
+            if ($validated['algorithm'] === 'N/A') {
+                $validated['daily_profit_estimate'] = 0;
+            }
 
             if ($request->hasFile('image')) {
                 $validated['image'] = $request->file('image')->store('mining', 'public');
@@ -70,7 +76,8 @@ class AdminMiningProductController extends Controller
                 'Ethash' => 'Ethash (Ethereum Classic)',
                 'Scrypt' => 'Scrypt (Litecoin)',
                 'X11' => 'X11 (Dash)',
-                'RandomX' => 'RandomX (Monero)'
+                'RandomX' => 'RandomX (Monero)',
+                'N/A' => 'N/A (Accessories, Frames, PSUs, etc.)'
             ];
             return view('admin.mining.edit', compact('miningProduct', 'algorithms'));
         }
@@ -97,6 +104,11 @@ class AdminMiningProductController extends Controller
 
             // Set featured to false if not present
             $validated['featured'] = $request->has('featured') ? true : false;
+            
+            // For accessories (N/A algorithm), set daily profit to 0
+            if ($validated['algorithm'] === 'N/A') {
+                $validated['daily_profit_estimate'] = 0;
+            }
 
             if ($request->hasFile('image')) {
                 $validated['image'] = $request->file('image')->store('mining', 'public');

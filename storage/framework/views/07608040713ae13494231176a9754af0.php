@@ -63,7 +63,20 @@
                     </div>
                     <div class="flex justify-between items-center mt-4">
                         <span class="text-2xl font-bold text-indigo-600">$<?php echo e(number_format($product->price, 2)); ?></span>
-                        <a href="<?php echo e(route('mining.show', $product->id)); ?>" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 font-medium transition duration-300">View Details</a>
+                        <div class="flex space-x-2">
+                            <button 
+                                onclick="quickAddToCart(<?php echo e($product->id); ?>)"
+                                class="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition duration-300 flex items-center justify-center <?php echo e($product->stock_quantity == 0 ? 'opacity-50 cursor-not-allowed' : ''); ?>"
+                                <?php echo e($product->stock_quantity == 0 ? 'disabled' : ''); ?>
+
+                                title="<?php echo e($product->stock_quantity == 0 ? 'Out of Stock' : 'Add to Cart'); ?>"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </button>
+                            <a href="<?php echo e(route('mining.show', $product->id)); ?>" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 font-medium transition duration-300">View Details</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -111,7 +124,20 @@
                             </div>
                             <div class="flex justify-between items-center mt-4">
                                 <span class="text-xl font-bold text-indigo-600">$<?php echo e(number_format($miner->price, 2)); ?></span>
-                                <a href="<?php echo e(route('mining.show', $miner->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                <div class="flex items-center space-x-2">
+                                    <button 
+                                        onclick="quickAddToCart(<?php echo e($miner->id); ?>)"
+                                        class="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition duration-300 flex items-center justify-center <?php echo e($miner->stock_quantity == 0 ? 'opacity-50 cursor-not-allowed' : ''); ?>"
+                                        <?php echo e($miner->stock_quantity == 0 ? 'disabled' : ''); ?>
+
+                                        title="<?php echo e($miner->stock_quantity == 0 ? 'Out of Stock' : 'Add to Cart'); ?>"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </button>
+                                    <a href="<?php echo e(route('mining.show', $miner->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -147,7 +173,20 @@
                             </div>
                             <div class="flex justify-between items-center mt-4">
                                 <span class="text-xl font-bold text-indigo-600">$<?php echo e(number_format($miner->price, 2)); ?></span>
-                                <a href="<?php echo e(route('mining.show', $miner->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                <div class="flex items-center space-x-2">
+                                    <button 
+                                        onclick="quickAddToCart(<?php echo e($miner->id); ?>)"
+                                        class="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition duration-300 flex items-center justify-center <?php echo e($miner->stock_quantity == 0 ? 'opacity-50 cursor-not-allowed' : ''); ?>"
+                                        <?php echo e($miner->stock_quantity == 0 ? 'disabled' : ''); ?>
+
+                                        title="<?php echo e($miner->stock_quantity == 0 ? 'Out of Stock' : 'Add to Cart'); ?>"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </button>
+                                    <a href="<?php echo e(route('mining.show', $miner->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,7 +219,20 @@
                             <p class="text-gray-600 mb-4 line-clamp-2"><?php echo e($accessory->description); ?></p>
                             <div class="flex justify-between items-center mt-4">
                                 <span class="text-xl font-bold text-indigo-600">$<?php echo e(number_format($accessory->price, 2)); ?></span>
-                                <a href="<?php echo e(route('mining.show', $accessory->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                <div class="flex items-center space-x-2">
+                                    <button 
+                                        onclick="quickAddToCart(<?php echo e($accessory->id); ?>)"
+                                        class="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition duration-300 flex items-center justify-center <?php echo e($accessory->stock_quantity == 0 ? 'opacity-50 cursor-not-allowed' : ''); ?>"
+                                        <?php echo e($accessory->stock_quantity == 0 ? 'disabled' : ''); ?>
+
+                                        title="<?php echo e($accessory->stock_quantity == 0 ? 'Out of Stock' : 'Add to Cart'); ?>"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </button>
+                                    <a href="<?php echo e(route('mining.show', $accessory->id)); ?>" class="text-indigo-600 hover:text-indigo-800 font-medium">Details</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -310,6 +362,57 @@
             </div>
         </div>
     </div>
+
+    <!-- Add notification area for cart updates at the bottom of the page -->
+    <div id="notification" class="hidden fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 shadow-md rounded-md transition-all duration-300"></div>
+
+    <!-- JavaScript for Quick Add to Cart -->
+    <script>
+        function quickAddToCart(productId) {
+            fetch('<?php echo e(route('cart.add')); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1,
+                    product_type: 'mining'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Product added to cart!');
+                } else {
+                    showNotification('Error: ' + data.message, true);
+                }
+            })
+            .catch(error => {
+                showNotification('An error occurred while adding the product to cart.', true);
+                console.error('Error:', error);
+            });
+        }
+        
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('hidden');
+            
+            if (isError) {
+                notification.classList.remove('bg-green-100', 'border-green-500', 'text-green-700');
+                notification.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+            } else {
+                notification.classList.remove('bg-red-100', 'border-red-500', 'text-red-700');
+                notification.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+            }
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
 
     <style>
         .bg-pattern {
