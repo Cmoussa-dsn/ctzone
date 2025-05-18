@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 if (!function_exists('getAdminDashboardData')) {
     /**
-     * Get data for admin dashboard
-     * 
      * @return array
      */
     function getAdminDashboardData() 
@@ -22,7 +20,7 @@ if (!function_exists('getAdminDashboardData')) {
             ->take(5)
             ->get();
         
-        // Get real sales data for the chart
+        
         $salesData = getSalesDataForDashboard();
         
         return compact(
@@ -37,13 +35,11 @@ if (!function_exists('getAdminDashboardData')) {
 
 if (!function_exists('getSalesDataForDashboard')) {
     /**
-     * Get sales data for the dashboard chart
-     * 
      * @return array
      */
     function getSalesDataForDashboard()
     {
-        // Get sales for the last 30 days
+        
         $startDate = Carbon::now()->subDays(29)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
         
@@ -58,12 +54,12 @@ if (!function_exists('getSalesDataForDashboard')) {
         ->orderBy('date')
         ->get();
         
-        // Format the data for Chart.js
+        
         $dates = [];
         $orderCounts = [];
         $salesTotals = [];
         
-        // Initialize with zeros for all 30 days
+       
         for ($i = 0; $i < 30; $i++) {
             $date = Carbon::now()->subDays(29 - $i)->format('Y-m-d');
             $dates[] = Carbon::now()->subDays(29 - $i)->format('M d');
@@ -71,7 +67,7 @@ if (!function_exists('getSalesDataForDashboard')) {
             $salesTotals[$date] = 0;
         }
         
-        // Fill in actual data
+       
         foreach ($dailySales as $sale) {
             $date = $sale->date;
             $orderCounts[$date] = $sale->order_count;

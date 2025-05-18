@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\View;
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of categories.
-     *
      * @return \Illuminate\View\View
      */
     public function index()
@@ -25,8 +23,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new category.
-     *
      * @return \Illuminate\View\View
      */
     public function create()
@@ -35,8 +31,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Store a newly created category in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -55,8 +49,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for editing the specified category.
-     *
      * @param  \App\Models\Category  $category
      * @return \Illuminate\View\View
      */
@@ -66,8 +58,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Update the specified category in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\RedirectResponse
@@ -87,8 +77,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified category from storage.
-     *
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\RedirectResponse
      */

@@ -14,8 +14,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -26,8 +24,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
      * @var list<string>
      */
     protected $hidden = [
@@ -36,8 +32,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -49,8 +43,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin.
-     *
+    
      * @return bool
      */
     public function isAdmin(): bool
@@ -58,17 +51,13 @@ class User extends Authenticatable
         return $this->role_id === 1;
     }
 
-    /**
-     * Get the cart items for the user.
-     */
+    
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 
-    /**
-     * Get the orders for the user.
-     */
+    
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

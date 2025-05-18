@@ -111,7 +111,7 @@ class DashboardHelper
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error generating sales data: ' . $e->getMessage());
             
-            // Return 0 in case of error
+            // Return 0 eza error
             return [
                 'labels' => [],
                 'orderCounts' => [],

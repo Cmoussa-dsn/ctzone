@@ -13,8 +13,6 @@ use Illuminate\View\View;
 class CartController extends Controller
 {
     /**
-     * Display the cart page.
-     *
      * @return \Illuminate\View\View
      */
     public function index(): View
@@ -31,8 +29,6 @@ class CartController extends Controller
     }
     
     /**
-     * Add a product to the cart.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -75,8 +71,6 @@ class CartController extends Controller
     }
     
     /**
-     * Update cart item quantity.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -107,8 +101,6 @@ class CartController extends Controller
     }
     
     /**
-     * Remove an item from the cart.
-     *
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */

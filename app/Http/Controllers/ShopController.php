@@ -8,9 +8,7 @@ use Illuminate\View\View;
 
 class ShopController extends Controller
 {
-    /**
-     * Display a listing of products for shopping.
-     */
+    
     public function index(): View
     {
         $products = Product::where('stock_quantity', '>', 0)
@@ -20,9 +18,7 @@ class ShopController extends Controller
         return view('products.index', compact('products'));
     }
 
-    /**
-     * Display the product details.
-     */
+    
     public function show(Product $product): View
     {
         return view('products.show', compact('product'));

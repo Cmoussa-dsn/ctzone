@@ -49,10 +49,10 @@ class AdminMiningProductController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
-            // Set featured to false if not present
+            
             $validated['featured'] = $request->has('featured') ? true : false;
             
-            // For accessories (N/A algorithm), set daily profit to 0
+            
             if ($validated['algorithm'] === 'N/A') {
                 $validated['daily_profit_estimate'] = 0;
             }
@@ -102,10 +102,10 @@ class AdminMiningProductController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
-            // Set featured to false if not present
+            
             $validated['featured'] = $request->has('featured') ? true : false;
             
-            // For accessories (N/A algorithm), set daily profit to 0
+            
             if ($validated['algorithm'] === 'N/A') {
                 $validated['daily_profit_estimate'] = 0;
             }

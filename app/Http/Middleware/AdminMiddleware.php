@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class AdminMiddleware
 {
     /**
-     * Handle an incoming request.
+     * Handle 
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -29,3 +29,6 @@ class AdminMiddleware
         return $next($request);
     }
 }
+/*handle admin middleware
+fjg
+*/

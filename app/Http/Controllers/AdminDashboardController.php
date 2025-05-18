@@ -34,7 +34,7 @@ class AdminDashboardController extends Controller
                 ->take(5)
                 ->get();
                 
-            // Get sales data for the chart using the helper
+            // jib sales dara lal chart 
             $salesData = DashboardHelper::getSalesData();
             
             return view('admin.dashboard', compact(
@@ -61,7 +61,7 @@ class AdminDashboardController extends Controller
      */
     public function getSalesDataJson(Request $request)
     {
-        // Check if user is admin
+        // if user is admin
         if (!\Illuminate\Support\Facades\Auth::check() || \Illuminate\Support\Facades\Auth::user()->role_id != 1) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -69,7 +69,7 @@ class AdminDashboardController extends Controller
         try {
             $period = $request->input('period', '30days');
             
-            // Use the helper class to get formatted sales data
+            // hon btjib mn file helper class la tjib formatted sales data
             $salesData = DashboardHelper::getSalesData($period);
             
             // Format data for JSON response

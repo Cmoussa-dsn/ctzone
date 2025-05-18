@@ -123,8 +123,6 @@ class MiningController extends Controller
     }
     
     /**
-     * display la mining product wahad
-     *
      * @param  int  $id
      * @return \Illuminate\View\View
      */
@@ -159,14 +157,14 @@ class MiningController extends Controller
      */
     public function calculator()
     {
-       //beddna login la nchyik aal calculator
+      
         if (!Auth::check()) {
             return redirect()->route('login')->with('message', 'Please login to access the mining calculator.');
         }
         
         $miningProducts = MiningProduct::whereNotIn('hashrate', ['N/A'])->get();
         
-        // jib crypto prices to display aal calc
+        
         $cryptoPrices = Cache::remember('crypto_prices', 300, function () {
             return $this->getCryptoPrices();
         });
@@ -175,8 +173,6 @@ class MiningController extends Controller
     }
     
     /**
-     * Calculate mining profitability based on user input
-     * 
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -193,14 +189,14 @@ class MiningController extends Controller
             'price_refresh_only' => 'nullable|boolean'
         ]);
         
-        // if only rfrsh rtrn prices current
+        
         if (isset($validated['price_refresh_only']) && $validated['price_refresh_only']) {
             return response()->json([
                 'prices' => $this->getCryptoPrices()
             ]);
         }
         
-        // Get crypto prices from api
+        
         $cryptoPrices = Cache::remember('crypto_prices', 300, function () {
             return $this->getCryptoPrices();
         });
@@ -358,8 +354,6 @@ class MiningController extends Controller
     }
     
     /**
-     * Get live cryptocurrency prices from CoinMarketCap API
-     * 
      * @return array
      */
     private function getCryptoPrices()
@@ -401,7 +395,7 @@ class MiningController extends Controller
                 return $this->getFallbackPrices();
             }
             
-            // Extract prices
+            
             $prices = [];
             foreach ($data['data'] as $symbol => $coinData) {
                 $prices[$symbol] = $coinData['quote']['USD']['price'];
@@ -421,18 +415,16 @@ class MiningController extends Controller
     }
     
     /**
-     * Provide fallback prices in case the API call fails
-     * 
      * @return array
      */
     private function getFallbackPrices()
     {
         return [
-            'BTC' => 60000,    // Updated fallback Bitcoin price
-            'ETH' => 3500,     // Updated fallback Ethereum price
-            'LTC' => 80,       // Updated fallback Litecoin price
-            'DASH' => 30,      // Updated fallback Dash price
-            'XMR' => 180,      // Updated fallback Monero price
+            'BTC' => 60000,    
+            'ETH' => 3500,     
+            'LTC' => 80,       
+            'DASH' => 30,      
+            'XMR' => 180,      
             'timestamp' => time(),
             'is_fallback' => true
         ];

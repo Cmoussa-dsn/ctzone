@@ -15,7 +15,7 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
-    // Constructor to apply middleware
+    // Constructor for mw
     
     public function __construct()
     {

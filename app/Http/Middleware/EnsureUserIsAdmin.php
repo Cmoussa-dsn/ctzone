@@ -17,7 +17,7 @@ class EnsureUserIsAdmin
      */
     public function handle($request, Closure $next)
     {
-        // Simple check that doesn't rely on complex injection
+        
         if (!Auth::check()) {
             return redirect('/login');
         }

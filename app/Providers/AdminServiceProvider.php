@@ -8,12 +8,10 @@ use App\Http\Controllers\AdminDashboardController;
 
 class AdminServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    
     public function register(): void
     {
-        // Explicitly bind the AdminController and AdminDashboardController
+        
         $this->app->bind('AdminController', function ($app) {
             return new AdminController();
         });
@@ -22,7 +20,7 @@ class AdminServiceProvider extends ServiceProvider
             return new AdminDashboardController();
         });
         
-        // Bind 'admin' to AdminController for middleware
+        
         $this->app->bind('admin', function($app) {
             return new AdminController();
         });

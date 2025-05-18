@@ -9,17 +9,15 @@ use Illuminate\Database\Seeder;
 
 class PcComponentsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+   
     public function run(): void
     {
-        // Make sure component categories exist first
+        
         $this->call([
             ComponentCategoriesSeeder::class,
         ]);
         
-        // Get category IDs
+        
         $processorsCategoryId = Category::where('name', 'Processors')->first()->id ?? 1;
         $motherboardsCategoryId = Category::where('name', 'Motherboards')->first()->id ?? 1;
         $graphicsCategoryId = Category::where('name', 'Graphics Cards')->first()->id ?? 1;
@@ -29,7 +27,7 @@ class PcComponentsSeeder extends Seeder
         $casesCategoryId = Category::where('name', 'Cases')->first()->id ?? 1;
         $coolingCategoryId = Category::where('name', 'Cooling')->first()->id ?? 1;
         
-        // Add processors
+       
         $processors = [
             [
                 'name' => 'Intel Core i7 12700K',
@@ -51,7 +49,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add motherboards
+        
         $motherboards = [
             [
                 'name' => 'ASUS ROG Strix Z690-E',
@@ -73,7 +71,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add graphics cards
+        
         $graphics = [
             [
                 'name' => 'NVIDIA RTX 3080',
@@ -95,7 +93,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add memory
+        
         $memory = [
             [
                 'name' => 'Corsair Vengeance 32GB DDR4',
@@ -117,7 +115,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add storage
+       
         $storage = [
             [
                 'name' => 'Samsung 970 EVO 1TB NVMe SSD',
@@ -139,7 +137,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add power supplies
+       
         $power = [
             [
                 'name' => 'Corsair RM850x 850W',
@@ -161,7 +159,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add cases
+       
         $cases = [
             [
                 'name' => 'NZXT H510i Mid Tower',
@@ -183,7 +181,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Add cooling
+        
         $cooling = [
             [
                 'name' => 'Noctua NH-D15 Air Cooler',
@@ -205,7 +203,7 @@ class PcComponentsSeeder extends Seeder
             ],
         ];
         
-        // Combine all components
+        
         $allComponents = array_merge(
             $processors,
             $motherboards,
@@ -217,9 +215,9 @@ class PcComponentsSeeder extends Seeder
             $cooling
         );
         
-        // Insert all components into the database
+        
         foreach ($allComponents as $component) {
-            // Check if this product already exists to avoid duplicates
+            
             $exists = Product::where('name', $component['name'])
                 ->where('category_id', $component['category_id'])
                 ->exists();

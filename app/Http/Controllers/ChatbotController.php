@@ -18,17 +18,15 @@ class ChatbotController extends Controller
     private $maxTokens = 500;
     private $temperature = 0.7;
     private $timeout = 15;
-    private $maxHistoryMessages = 5; // Maximum number of previous messages to store
+    private $maxHistoryMessages = 5; 
 
     public function __construct()
     {
-        // Get the API key from environment variables
+        // jib api key mn env
         $this->apiKey = env('OPENAI_API_KEY');
     }
 
-    /**
-     * Process the chatbot message and return AI response
-     */
+    
     public function processMessage(Request $request)
     {
         try {
@@ -38,14 +36,14 @@ class ChatbotController extends Controller
                 return response()->json(['error' => 'No message provided'], 400);
             }
 
-            // Check if the message is PC-related
+            
             if (!$this->isPcRelated($message)) {
                 return response()->json([
                     'response' => "I'm specialized in helping with computer and PC-related questions. Please ask me about our products, computer specifications, or PC building services."
                 ]);
             }
 
-            // Check if API key is set
+            
             if (empty($this->apiKey)) {
                 Log::error('OpenAI API key is not set');
                 return response()->json(['error' => 'API key configuration error'], 500);
@@ -82,7 +80,7 @@ class ChatbotController extends Controller
                 $messages[] = $item;
             }
             
-            // hot lal user msg (currntly)
+            // hot lal user msg (currently)
             $messages[] = ['role' => 'user', 'content' => $message];
 
            
@@ -106,7 +104,7 @@ class ChatbotController extends Controller
                     
                     $this->addToConversationHistory($message, $aiMessage);
                     
-                    // Log successful response for monitoring
+                    
                     Log::info('Chatbot response sent', ['message_length' => strlen($message), 'response_length' => strlen($aiMessage)]);
                     return response()->json(['response' => $aiMessage]);
                 }
@@ -129,7 +127,7 @@ class ChatbotController extends Controller
                 'user_query' => $message
             ]);
             
-            // Provide  user facing msg based on error tp
+            
             $userMessage = 'I\'m having trouble connecting to my knowledge base. Please try again in a moment.';
             
             if ($statusCode === 429) {
@@ -245,7 +243,7 @@ class ChatbotController extends Controller
             }
         }
         
-        // Include price range
+        
         $minPrice = Product::min('price');
         $maxPrice = Product::max('price');
         $info[] = "Our products range in price from \${$minPrice} to \${$maxPrice}.";

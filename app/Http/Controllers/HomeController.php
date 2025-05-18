@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\DB;
 class HomeController extends Controller
 {
     /**
-     * Display the home page.
-     *
      * @return \Illuminate\Contracts\View\View
      */
     public function index()
@@ -24,8 +22,6 @@ class HomeController extends Controller
     }
 
     /**
-     * Display the buy page with products separated into PCs and components.
-     *
      * @return \Illuminate\Contracts\View\View
      */
     public function buy(Request $request)

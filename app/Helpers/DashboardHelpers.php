@@ -31,7 +31,7 @@ function getSalesDataForDashboard()
     $orderCounts = [];
     $salesTotals = [];
     
-    // Initialize with zeros for all 30 days
+    // zeros->30 days
     for ($i = 0; $i < 30; $i++) {
         $date = Carbon::now()->subDays(29 - $i)->format('Y-m-d');
         $dates[] = Carbon::now()->subDays(29 - $i)->format('M d');

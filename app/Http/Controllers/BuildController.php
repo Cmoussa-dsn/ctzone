@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Response;
 
 class BuildController extends Controller
 {
-    /**
-     * Display the PC builder page
-     */
+    
     public function index()
     {
        
@@ -77,10 +75,10 @@ class BuildController extends Controller
         
         
         if (!$processor) {
-            // Create a temporary product for the custom PC
+            
             $product = Product::create([
                 'name' => 'Custom PC Build',
-                'category_id' => 2, // Gaming PCs category
+                'category_id' => 2, 
                 'description' => 'Custom built PC with selected components',
                 'price' => $request->total_price,
                 'stock_quantity' => 1,
@@ -90,7 +88,7 @@ class BuildController extends Controller
            
             $product = Product::create([
                 'name' => 'Custom PC with ' . $processor->name,
-                'category_id' => 2, // Gaming PCs category
+                'category_id' => 2, 
                 'description' => 'Custom built PC with selected components including ' . $processor->name,
                 'price' => $request->total_price,
                 'stock_quantity' => 1,
@@ -121,7 +119,7 @@ class BuildController extends Controller
             ]
         ]);
         
-        // Add the custom PC to the cart
+        
         CartItem::create([
             'user_id' => Auth::id(),
             'product_id' => $product->id,
@@ -135,21 +133,20 @@ class BuildController extends Controller
     
     private function getComponentsByType($type)
     {
-        // Log the type we're looking for
+        
         Log::debug("Fetching components of type: " . $type);
         
-        // Specifically check for products where the 'type' column equals the requested type
         $components = Product::where('type', $type)->get();
         
-        // If debug is enabled, dump the query to see what's happening
+        
         Log::debug("Query executed: " . Product::where('type', $type)->toSql());
         
-        // Log how many components we found
+        
         Log::debug("Found " . $components->count() . " components with type: " . $type);
         
-        // If no components found with the exact type, try to find them by category name
+       
         if ($components->isEmpty()) {
-            // Map of type to possible category names
+            
             $categoryMap = [
                 'processors' => ['Processors', 'CPUs', 'PC Parts'],
                 'motherboards' => ['Motherboards', 'PC Parts'],
@@ -168,8 +165,7 @@ class BuildController extends Controller
             Log::debug("Found category IDs: " . implode(", ", $categoryIds));
             
             if (!empty($categoryIds)) {
-                // Only get components from this category that don't already have a type set
-                // This prevents overlapping results
+                
                 $components = Product::whereIn('category_id', $categoryIds)
                                     ->where(function($query) {
                                         $query->whereNull('type')
@@ -180,13 +176,13 @@ class BuildController extends Controller
             }
         }
         
-        // If still no components, return demo data
+        //  return demo data eza ma l2ina comps
         if ($components->isEmpty()) {
             Log::debug("No components found, returning demo data");
             return $this->getDemoComponents($type);
         }
         
-        // Debug log the component list
+        // 
         foreach($components as $component) {
             Log::debug("Component: {$component->id} - {$component->name} - Type: {$component->type}");
         }
@@ -232,7 +228,7 @@ class BuildController extends Controller
             ],
         ];
         
-        // Convert array to collection of objects
+        
         return collect($demoComponents[$type])->map(function($item) {
             return (object)$item;
         });

@@ -16,20 +16,18 @@ class BuyController extends Controller
         $this->middleware('auth')->except(['index']);
     }
 
-    /**
-     * Display the buy page with products and categories
-     */
+    
     public function index()
     {
         try {
             $query = Product::query();
             
-            // Filter by category if selected
+            
             if (request()->has('category')) {
                 $query->where('category_id', request('category'));
             }
             
-            // Search by name if provided
+            
             if (request()->has('search')) {
                 $query->where('name', 'like', '%' . request('search') . '%');
             }
@@ -44,9 +42,7 @@ class BuyController extends Controller
         }
     }
 
-    /**
-     * Show form to add a new product (admin only)
-     */
+   
     public function create()
     {
         try {
@@ -62,9 +58,7 @@ class BuyController extends Controller
         }
     }
 
-    /**
-     * Store a new product (admin only)
-     */
+    
     public function store(Request $request)
     {
         try {
@@ -95,9 +89,7 @@ class BuyController extends Controller
         }
     }
 
-    /**
-     * Show form to edit a product (admin only)
-     */
+    
     public function edit(Product $product)
     {
         try {
@@ -113,9 +105,7 @@ class BuyController extends Controller
         }
     }
 
-    /**
-     * Update a product (admin only)
-     */
+    
     public function update(Request $request, Product $product)
     {
         try {
@@ -150,9 +140,7 @@ class BuyController extends Controller
         }
     }
 
-    /**
-     * Delete a product (admin only)
-     */
+    
     public function destroy(Product $product)
     {
         try {

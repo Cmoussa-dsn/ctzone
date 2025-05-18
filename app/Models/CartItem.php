@@ -11,8 +11,6 @@ class CartItem extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -21,9 +19,7 @@ class CartItem extends Model
         'quantity',
     ];
 
-    /**
-     * Get the product associated with the cart item.
-     */
+    
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

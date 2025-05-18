@@ -12,8 +12,6 @@ class Order extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -22,17 +20,13 @@ class Order extends Model
         'status',
     ];
 
-    /**
-     * Get the user that owns the order.
-     */
+   
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the order items for the order.
-     */
+    
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
