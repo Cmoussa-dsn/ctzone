@@ -180,7 +180,7 @@
                     <p class="text-gray-600 mb-6">Our team of experts is ready to help you find the perfect PC solution for your needs.</p>
                     <div class="flex flex-wrap gap-4">
                         <a href="{{ route('login') }}" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-semibold transition duration-300">Get Started</a>
-                        <a href="#contact-form" class="px-6 py-3 border border-indigo-600 hover:bg-indigo-50 rounded-lg text-indigo-600 font-semibold transition duration-300">Contact Us</a>
+                        <a href="/contact" class="px-6 py-3 border border-indigo-600 hover:bg-indigo-50 rounded-lg text-indigo-600 font-semibold transition duration-300">Contact Us</a>
                     </div>
                 </div>
                 <div class="md:w-5/12">
@@ -188,35 +188,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Contact Form -->
-    <div id="contact-form" class="container mx-auto px-6 py-16">
-        <div class="max-w-xl mx-auto text-center mb-12">
-            <h2 class="text-3xl font-bold mb-4">Get in Touch</h2>
-            <p class="text-gray-600">Have questions? Reach out to our team for personalized assistance.</p>
-        </div>
-
-        <form method="POST" action="{{ route('home') }}" class="max-w-xl mx-auto">
-            @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                    <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-            </div>
-            <div class="mb-6">
-                <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                <textarea id="message" name="message" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-            </div>
-            <div class="text-center">
-                <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-semibold transition duration-300">Send Message</button>
-            </div>
-        </form>
     </div>
 
     <style>
