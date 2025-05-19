@@ -58,6 +58,10 @@
                     <i class="fas fa-tags"></i>
                     <span class="hidden md:inline">Categories</span>
                 </a>
+                <a href="<?php echo e(route('admin.contacts.index')); ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg transition <?php echo e(request()->routeIs('admin.contacts.*') ? 'bg-green-500 text-white shadow' : 'text-gray-700 hover:bg-green-100'); ?>">
+                    <i class="fas fa-tools"></i>
+                    <span class="hidden md:inline">Repair Requests</span>
+                </a>
             </nav>
         </aside>
         <!-- Main Content -->

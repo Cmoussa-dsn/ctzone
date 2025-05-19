@@ -16,9 +16,16 @@ use App\Http\Controllers\SimpleAdminController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\MiningController;
 use App\Http\Controllers\AdminMiningProductController;
+use App\Http\Controllers\ContactController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/home-debug', function () {
+    return view('home')->with('debug_links', [
+        '/debug-contacts' => 'Debug Contacts Table',
+        '/admin/contacts' => 'Admin Contacts Page'
+    ]);
+});
 Route::get('/buy', [HomeController::class, 'buy'])->name('buy');
 Route::get('/pc-builder', [BuildController::class, 'pcBuilder'])->name('pc-builder');
 Route::post('/pc-builder/store', [BuildController::class, 'store'])->name('pc-builder.store');
@@ -588,6 +595,11 @@ Route::get('/admin/direct-dashboard', function () {
     return redirect('/')->with('error', 'You need admin privileges to access this page.');
 })->middleware('auth')->name('admin.direct-dashboard');
 
+// Admin contact management routes
+Route::get('/admin/contacts', [ContactController::class, 'adminIndex'])->name('admin.contacts.index');
+Route::get('/admin/contacts/{contact}', [ContactController::class, 'adminShow'])->name('admin.contacts.show');
+Route::post('/admin/contacts/{contact}/status', [ContactController::class, 'adminUpdateStatus'])->name('admin.contacts.update-status');
+
 // Fallback route for admin
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/{path?}', function ($path = null) {
@@ -699,5 +711,10 @@ Route::get('/fix-component-types', function() {
         'count' => count($updated)
     ]);
 });
+
+// Contact routes
+Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/contact/success', [ContactController::class, 'success'])->name('contact.success');
 
 require __DIR__.'/auth.php';

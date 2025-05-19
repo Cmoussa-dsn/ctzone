@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    // Helper function to escape HTML
+    // Helper function to escape HTML to escape xss attacks
     function escapeHtml(unsafe) {
         return unsafe
             .replace(/&/g, "&amp;")

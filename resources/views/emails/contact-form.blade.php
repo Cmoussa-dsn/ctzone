@@ -40,6 +40,10 @@
     <div class="content">
         <p><strong>From:</strong> {{ $name }} ({{ $email }})</p>
         
+        @if(isset($phone) && $phone)
+        <p><strong>Phone:</strong> {{ $phone }}</p>
+        @endif
+        
         <p><strong>Message:</strong></p>
         <p>{{ $messageContent }}</p>
     </div>

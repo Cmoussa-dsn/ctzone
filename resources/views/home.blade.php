@@ -1,4 +1,15 @@
 <x-app-layout>
+    @if(isset($debug_links))
+    <div class="bg-yellow-100 p-4 border border-yellow-400">
+        <h2 class="text-lg font-bold mb-2">Debug Links:</h2>
+        <ul>
+            @foreach($debug_links as $url => $label)
+                <li><a href="{{ $url }}" class="text-blue-600 underline">{{ $label }}</a></li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+    
     <!-- Hero Section -->
     <div class="relative bg-gradient-to-r from-blue-900 to-indigo-800 text-white">
         <div class="absolute inset-0 opacity-20 bg-pattern"></div>

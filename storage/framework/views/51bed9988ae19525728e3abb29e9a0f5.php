@@ -8,6 +8,17 @@
 <?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
+    <?php if(isset($debug_links)): ?>
+    <div class="bg-yellow-100 p-4 border border-yellow-400">
+        <h2 class="text-lg font-bold mb-2">Debug Links:</h2>
+        <ul>
+            <?php $__currentLoopData = $debug_links; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $url => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <li><a href="<?php echo e($url); ?>" class="text-blue-600 underline"><?php echo e($label); ?></a></li>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+    
     <!-- Hero Section -->
     <div class="relative bg-gradient-to-r from-blue-900 to-indigo-800 text-white">
         <div class="absolute inset-0 opacity-20 bg-pattern"></div>

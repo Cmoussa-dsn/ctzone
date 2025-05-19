@@ -54,6 +54,11 @@ use Illuminate\Support\Facades\Auth;
                             <a href="<?php echo e(route('mining.index')); ?>" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600 transition duration-150">
                                 Mining
                             </a>
+                            <?php if(!Auth::check() || !Auth::user()->isAdmin()): ?>
+                            <a href="<?php echo e(route('contact.index')); ?>" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600 transition duration-150">
+                                Repair Services
+                            </a>
+                            <?php endif; ?>
                         </nav>
                     </div>
                     
@@ -118,6 +123,9 @@ use Illuminate\Support\Facades\Auth;
                         <a href="<?php echo e(route('buy')); ?>" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">Buy</a>
                         <a href="<?php echo e(route('pc-builder')); ?>" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">Build</a>
                         <a href="<?php echo e(route('mining.index')); ?>" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">Mining</a>
+                        <?php if(!Auth::check() || !Auth::user()->isAdmin()): ?>
+                        <a href="<?php echo e(route('contact.index')); ?>" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">Repair Services</a>
+                        <?php endif; ?>
                     </div>
                     
                     <?php if(auth()->guard()->check()): ?>

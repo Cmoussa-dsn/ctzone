@@ -2,7 +2,13 @@
 @section('title', 'Admin Dashboard')
 @section('content')
     <div class="w-full">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Dashboard</h1>
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+            <a href="{{ route('home') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center">
+                <i class="fas fa-home mr-2"></i>
+                Back to Home
+            </a>
+        </div>
         
         <!-- Stats Overview -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
