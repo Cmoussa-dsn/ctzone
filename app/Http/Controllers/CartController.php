@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\MiningProduct;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,9 +13,7 @@ use Illuminate\View\View;
 
 class CartController extends Controller
 {
-    /**
-     * @return \Illuminate\View\View
-     */
+    
     public function index(): View
     {
         $cartItems = CartItem::where('user_id', Auth::id())
@@ -28,27 +27,56 @@ class CartController extends Controller
         return view('cart', compact('cartItems', 'total'));
     }
     
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function addToCart(Request $request): JsonResponse
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-        ]);
+        $productType = $request->input('product_type', 'regular');
         
-        $productId = $request->product_id;
+        if ($productType === 'mining') {
+            $request->validate([
+                'product_id' => 'required|exists:mining_products,id',
+            ]);
+            
+            // Get the mining product
+            $miningProduct = MiningProduct::findOrFail($request->product_id);
+            
+            // First check if there's a corresponding regular product
+            $product = Product::where('name', $miningProduct->name)->first();
+            
+            // If not, create a temporary one to add to cart
+            if (!$product) {
+                $product = Product::create([
+                    'name' => $miningProduct->name,
+                    'description' => $miningProduct->description,
+                    'price' => $miningProduct->price,
+                    'stock_quantity' => $miningProduct->stock_quantity,
+                    'image' => $miningProduct->image,
+                    'category_id' => 1, // Assuming 1 is the mining category
+                    'is_mining_product' => true,
+                    'mining_product_id' => $miningProduct->id
+                ]);
+            }
+            
+            $productId = $product->id;
+        } else {
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+            ]);
+            
+            $productId = $request->product_id;
+        }
+        
         $userId = Auth::id();
+        $quantity = $request->input('quantity', 1);
         
-        // chuf eza item mwjud bl cart
+        // Check if item already exists in cart
         $cartItem = CartItem::where('user_id', $userId)
             ->where('product_id', $productId)
             ->first();
             
         if ($cartItem) {
-           
-            $cartItem->quantity += 1;
+            // If item exists, update quantity
+            $cartItem->quantity += $quantity;
             $cartItem->save();
             
             return response()->json([
@@ -60,7 +88,7 @@ class CartController extends Controller
             CartItem::create([
                 'user_id' => $userId,
                 'product_id' => $productId,
-                'quantity' => 1,
+                'quantity' => $quantity,
             ]);
             
             return response()->json([

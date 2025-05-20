@@ -40,6 +40,12 @@
                                             </div>
                                         @endif
                                         
+                                        @if($item->product->is_mining_product)
+                                            <div class="mt-2 text-xs text-gray-500">
+                                                <p>Mining product</p>
+                                            </div>
+                                        @endif
+                                        
                                         <p class="text-indigo-600 font-semibold mt-1">${{ number_format($item->product->price, 2) }}</p>
                                     </div>
                                     

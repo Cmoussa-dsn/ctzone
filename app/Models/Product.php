@@ -21,11 +21,18 @@ class Product extends Model
         'price',
         'stock_quantity',
         'image',
+        'is_mining_product',
+        'mining_product_id'
     ];
 
    
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function miningProduct(): BelongsTo
+    {
+        return $this->belongsTo(MiningProduct::class);
     }
 }

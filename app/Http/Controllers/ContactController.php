@@ -11,17 +11,13 @@ use Illuminate\Support\Facades\Storage;
 
 class ContactController extends Controller
 {
-    /**
-     * Display the contact form
-     */
+    
     public function index()
     {
         return view('contact.index');
     }
     
-    /**
-     * Handle contact form submission
-     */
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -31,7 +27,7 @@ class ContactController extends Controller
             'problem' => 'required|string',
         ]);
         
-        // Create a new contact entry
+        
         $contact = Contact::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -40,7 +36,7 @@ class ContactController extends Controller
             'user_id' => Auth::id(),
         ]);
         
-        // Send email notification
+        
         Mail::to('charbelmoussa13@gmail.com')->send(new ContactFormMail(
             $validated['name'],
             $validated['email'],
@@ -53,17 +49,13 @@ class ContactController extends Controller
         return redirect()->route('contact.success');
     }
     
-    /**
-     * Display success page after form submission
-     */
+   
     public function success()
     {
         return view('contact.success');
     }
     
-    /**
-     * Admin: List all repair requests
-     */
+    
     public function adminIndex()
     {
         // Temporarily disable admin check for debugging
@@ -73,9 +65,9 @@ class ContactController extends Controller
         
         $contacts = Contact::orderBy('created_at', 'desc')->paginate(15);
         
-        // Debug information
+        
         if ($contacts->count() == 0) {
-            // Get total count
+            
             $totalCount = Contact::count();
             return view('admin.contacts.index', compact('contacts'))
                 ->with('debug_message', "No contacts found in paginated result. Total contacts in database: $totalCount");
@@ -84,12 +76,10 @@ class ContactController extends Controller
         return view('admin.contacts.index', compact('contacts'));
     }
     
-    /**
-     * Admin: Show a specific repair request
-     */
+    
     public function adminShow(Contact $contact)
     {
-        // Check if user is admin
+       
         if (!Auth::user() || Auth::user()->role_id != 1) {
             return redirect()->route('home')->with('error', 'Unauthorized access');
         }
@@ -97,9 +87,7 @@ class ContactController extends Controller
         return view('admin.contacts.show', compact('contact'));
     }
     
-    /**
-     * Admin: Update repair request status
-     */
+    
     public function adminUpdateStatus(Request $request, Contact $contact)
     {
         // Check if user is admin
@@ -128,7 +116,7 @@ class ContactController extends Controller
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg|max:5120', // 5MB max per file
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg|max:5120', 
         ]);
 
         $attachments = [];
