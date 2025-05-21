@@ -13,6 +13,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
@@ -23,6 +24,15 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($products as $product)
                             <tr class="hover:bg-green-50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="h-16 w-16 object-cover rounded">
+                                    @else
+                                        <div class="h-16 w-16 bg-gray-100 flex items-center justify-center rounded">
+                                            <span class="text-gray-400">No image</span>
+                                        </div>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{{ $product->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $product->category->name ?? '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-green-700 font-bold">${{ number_format($product->price, 2) }}</td>

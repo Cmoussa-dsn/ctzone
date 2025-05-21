@@ -311,17 +311,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        // Handle image upload
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Log the type value
-        \Illuminate\Support\Facades\Log::debug('Creating product with type: ' . ($request->type ?? 'null'));
-        
+        // Create the product
         $product = \App\Models\Product::create($validated);
-        
-        // Log the created product
-        \Illuminate\Support\Facades\Log::debug('Created product ID: ' . $product->id . ', Type: ' . ($product->type ?? 'null'));
 
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully.');
     }
@@ -337,7 +333,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         return redirect('/')->with('error', 'Unauthorized.');
     })->name('products.edit');
     
-    Route::post('/products/{product}/edit', function (Illuminate\Http\Request $request, $productId) {
+    Route::post('/products/{product}', function (Illuminate\Http\Request $request, $productId) {
         if (Auth::check() && Auth::user()->role_id == 1) {
             $product = \App\Models\Product::findOrFail($productId);
             $validated = $request->validate([
@@ -347,21 +343,29 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
                 'stock_quantity' => 'required|integer|min:0',
                 'category_id' => 'required|exists:categories,id',
                 'type' => 'nullable|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             
-            // Log the type value before update
-            \Illuminate\Support\Facades\Log::debug('Updating product ID: ' . $product->id);
-            \Illuminate\Support\Facades\Log::debug('Current type: ' . ($product->type ?? 'null') . ', New type: ' . ($request->type ?? 'null'));
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if it exists
+                if ($product->image) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+                }
+                
+                // Store the new image
+                $validated['image'] = $request->file('image')->store('products', 'public');
+            } else {
+                // Don't update the image field if no new image was uploaded
+                unset($validated['image']);
+            }
             
             $product->update($validated);
-            
-            // Log the type value after update
-            \Illuminate\Support\Facades\Log::debug('Updated product type: ' . ($product->type ?? 'null'));
             
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
         }
         return redirect('/')->with('error', 'Unauthorized.');
-    })->name('products.update');
+    })->name('admin.products.update');
     
     Route::delete('/products/{product}', function ($productId) {
         if (Auth::check() && Auth::user()->role_id == 1) {

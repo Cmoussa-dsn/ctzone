@@ -4,9 +4,8 @@
     <div class="max-w-xl mx-auto">
         <div class="glass p-8 rounded-2xl shadow-lg">
             <h1 class="text-2xl font-bold text-green-700 mb-6">Edit Product</h1>
-            <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="/admin/products/{{ $product->id }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Name</label>
                     <input type="text" name="name" value="{{ old('name', $product->name) }}" class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-green-500 focus:border-green-500" required>
