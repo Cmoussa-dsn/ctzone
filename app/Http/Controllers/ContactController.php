@@ -28,7 +28,7 @@ class ContactController extends Controller
         ]);
         
         
-        $contact = Contact::create([
+         Contact::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
@@ -36,15 +36,6 @@ class ContactController extends Controller
             'user_id' => Auth::id(),
         ]);
         
-        
-        Mail::to('charbelmoussa13@gmail.com')->send(new ContactFormMail(
-            $validated['name'],
-            $validated['email'],
-            'New Repair Request',
-            $validated['problem'],
-            [],
-            $validated['phone']
-        ));
         
         return redirect()->route('contact.success');
     }
@@ -107,7 +98,7 @@ class ContactController extends Controller
     }
     
     /**
-     * Legacy email sender method
+     * Legacy email sender method - disabled
      */
     public function send(Request $request)
     {
@@ -119,6 +110,7 @@ class ContactController extends Controller
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg|max:5120', 
         ]);
 
+        // Store attachments if needed
         $attachments = [];
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
@@ -127,13 +119,14 @@ class ContactController extends Controller
             }
         }
 
-        Mail::to('charbelmoussa13@gmail.com')->send(new ContactFormMail(
-            $request->name,
-            $request->email,    
-            $request->subject,
-            $request->message,
-            $attachments
-        ));
+        // Email sending disabled
+        // Mail::to('charbelmoussa13@gmail.com')->send(new ContactFormMail(
+        //     $request->name,
+        //     $request->email,    
+        //     $request->subject,
+        //     $request->message,
+        //     $attachments
+        // ));
 
         return back()->with('success', 'Thank you for your message. We will get back to you soon!');
     }
